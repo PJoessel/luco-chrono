@@ -44,3 +44,9 @@ Remis au propre le 3/11/2026, sans changer le comportement (testé par de vrais 
 ## Pistes
 
 Pause pendant le repos (blessure, matériel), durée à la seconde, préréglages (entraînement, compétition), annonce vocale, historique des assauts, version installable.
+
+## Publication
+
+- Code public sur GitHub : https://github.com/PJoessel/luco-chrono (branche `main`, créé le 3/11/2026). Licence MIT (`LICENSE`), police Barlow sous OFL (`OFL-Barlow.txt`, à garder tant que la police est intégrée). `README.md` en français, pour ceux qui veulent reprendre l'app pour leur club.
+- Commits signés « Pierre Joëssel » avec l'adresse masquée GitHub (`32869915+PJoessel@users.noreply.github.com`, réglée dans le dépôt seulement).
+- Hébergement du site : pas encore choisi (GitHub Pages recommandé), à faire avec la PWA.
