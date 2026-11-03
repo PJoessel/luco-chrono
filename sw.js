@@ -5,9 +5,10 @@
    réseau le cache est rafraîchi en arrière-plan : la nouvelle version s'affiche
    au lancement suivant.
 
-   Changer VERSION à chaque modif des fichiers ci-dessous force un cache tout neuf. */
+   Quand on ajoute ou renomme un fichier : l'ajouter à FICHIERS et changer VERSION
+   (le cache repart de zéro). Une simple modif d'un fichier n'a besoin de rien. */
 
-const VERSION = "luco-chrono-1";
+const VERSION = "luco-chrono-2";
 const FICHIERS = [
   "./",
   "./index.html",
@@ -44,7 +45,8 @@ self.addEventListener("fetch", (e) => {
 
       const reseau = fetch(req)
         .then((rep) => {
-          if (rep.ok) cache.put(cle, rep.clone());
+          // une réponse redirigée ne peut pas resservir une ouverture de page : on ne la garde pas
+          if (rep.ok && !rep.redirected) cache.put(cle, rep.clone());
           return rep;
         })
         .catch(() => null);

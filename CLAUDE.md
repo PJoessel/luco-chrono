@@ -1,6 +1,6 @@
 # LUCO CHRONO
 
-Chrono de reprises pour la canne de combat (club Les Cannes du Luco). Pas de build, pas de dépendance : on ouvre `index.html` dans un navigateur, sur téléphone de préférence. L'app tient dans `index.html` (polices Barlow Condensed 600 et 800 en base64 dedans). À côté, seulement ce qui sert à l'installer (PWA) : `manifest.webmanifest`, `sw.js`, `icons/`.
+Chrono de reprises pour la canne de combat (club Les Cannes du Luco). Pas de build, pas de dépendance : on ouvre `index.html` dans un navigateur, sur téléphone de préférence. L'app tient dans `index.html` (56 Ko, polices Barlow Condensed 600 et 800 en base64 dedans). À côté, seulement ce qui sert à l'installer (PWA) : `manifest.webmanifest`, `sw.js`, `icons/`.
 
 Point de départ : `luco-chrono-hors-ligne (2).html` fourni par Pierre le 3/11/2026, copié tel quel en `index.html`. Le site du club est à part, dans `../cannes-du-luco`.
 
@@ -24,10 +24,10 @@ Point de départ : `luco-chrono-hors-ligne (2).html` fourni par Pierre le 3/11/2
 Remis au propre le 3/11/2026, sans changer le comportement (testé par de vrais clics : réglages, pause, temps d'arrêt, enchaînement des reprises, fin d'assaut).
 
 - **Mise en page** : titre « LUCO CHRONO » centré. Chaque écran (`.screen`) fait au plus 560 px de large, centré (tablette, ordi), et c'est un conteneur `container-type: size` : les tailles en `cqw`/`cqh` suivent l'écran. Titre et intitulés grandissent avec l'écran (`clamp`). Réglages : intitulés centrés, 12 px au-dessus de leur réglage. Les + et − des cercles sont **dessinés en CSS** (`.step::before/::after`, le nom du bouton est dans `aria-label`) : avec les caractères de la police, ils tombaient sous le centre. Les valeurs (`.ctl .v`) sont remontées de 0,05em pour être au niveau du centre des cercles (mesuré : écart restant < 0,2 px). Tailles vérifiées le 3/11/2026 en 320×568, 375×812 et 768×1024 : rien ne déborde.
-- Tout dans `index.html`. En tête : liens vers les icônes et le manifeste, réglages iPhone, puis les polices en base64 (2 lignes très longues dans le premier `<style>`, ne pas les toucher à la main). Ensuite : CSS par écran, HTML commenté, puis le script.
+- Tout dans `index.html`. En tête : liens vers les icônes et le manifeste, réglages iPhone, puis les polices en base64 (2 lignes très longues dans le premier `<style>`, ne pas les toucher à la main). Polices **réduites** le 3/11/2026 avec `pyftsubset` (fonttools) : latin de base, Latin-1 (accents français), Œ œ Ÿ, guillemets et apostrophes typographiques, tirets, points de suspension, €, signe moins ; fonctions gardées : kern, tnum, liga, ccmp, locl. 22 Ko → 12 Ko chacune. Si un texte ajouté utilise un autre caractère, il s'affichera dans la police de secours : refaire le sous-ensemble depuis la police complète (github.com/jpt/barlow). Ensuite : CSS par écran, HTML commenté, puis le script.
 - Script en sections : Réglages, Sons, Écran gardé allumé, Chrono, Boutons, Toujours en portrait, Hors ligne, Démarrage. Noms en français (`etat`, `reprise`, `finA`, `demarrerReprise`, `finirReprise`…).
 - Couleurs en tokens sur `:root` : `--noir #000`, `--rouge #e10600`, `--jaune #ffd400`, `--blanc #fff`, `--gris #2a2a2a` (fond de barre), `--gris-clair #8f8f8f` (pause), `--bleu #8ab4dc` (repos), `--rouge-doux #e06a60` (fin). Thème sombre uniquement.
-- Le temps se cale sur `Date.now()` (`finA`), pas sur le nombre de tops : pas de dérive.
+- Le temps se cale sur `Date.now()` (`finA`), pas sur le nombre de tops : pas de dérive. Les enchaînements automatiques (reprise → repos → reprise) partent pile de la fin précédente (`suite()`), sauf si l'app sortait de veille avec plus de 2 s de retard : on repart alors de maintenant, sans rattraper (pas de sons en rafale). Mesuré : repos de 30,002 s, reprise de 10,003 s. Les chiffres ne sont réécrits qu'au changement de seconde.
 - États (`etat`) : `setup`, `run`, `paused`, `repos`, `between` (fin de reprise sans repos), `done`. Toujours passer par `changerEtat()`. Le gros bouton jaune (`#bPause`) change de rôle selon l'état. `dureeEnCours` = durée de ce qui tourne (reprise ou repos), pour la barre.
 - Tester : `python3 -m http.server 8765` dans le dossier (config dans `.claude/launch.json`), puis http://localhost:8765. La durée de test de 10 s (constante `TEST`) sert à vérifier une reprise vite.
 
@@ -40,6 +40,16 @@ Remis au propre le 3/11/2026, sans changer le comportement (testé par de vrais 
 5. ~~Écran d'ouverture de 1,8 s~~ : réduit à 0,5 s le 3/11/2026.
 6. ~~Code compressé~~ : fait le 3/11/2026.
 7. ~~Temps d'arrêt affichés sur « Prêt »~~ : l'étape « Prêt » n'existe plus (3/11/2026).
+
+## Relecture du 3/11/2026 (bugs et poids)
+
+- Poids : `index.html` 82 → 56 Ko (polices réduites), icônes PNG 53 → 16 Ko (palette 256 couleurs avec Pillow, rendu identique). Site complet : environ 80 Ko.
+- iPhone : `-webkit-user-select: none` (sinon l'appui long sélectionne du texte), son relancé si le contexte audio est « interrupted » (appel, veille) et au retour dans l'app, `dvh`/`dvw` pour la page tournée (100vh compte la barre d'adresse de Safari).
+- Android : `contextmenu` bloqué et `touch-action: none` sur le bouton jaune, sinon l'appui long de 1 s pouvait être annulé par le menu du navigateur.
+- Écran allumé pendant tout l'assaut, pause comprise (avant : seulement combat et repos au retour dans l'app), sans double demande.
+- Réglages sauvés relus comme des nombres (une valeur abîmée ne casse plus rien).
+- `sw.js` ne garde pas les réponses redirigées (elles ne peuvent pas resservir une ouverture de page). Manifeste : `id`.
+- Testé : bornes des réglages, pause, repos, appui long, mode sans repos, arrêt, réglages abîmés, installation et hors ligne (Brave sans écran).
 
 ## Pistes
 

@@ -3,6 +3,7 @@
   "short_name": "LUCO CHRONO",
   "description": "Chrono de reprises pour la canne de combat.",
   "lang": "fr",
+  "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
