@@ -1,6 +1,6 @@
 # LUCO CHRONO
 
-Chrono de reprises pour la canne de combat (club Les Cannes du Luco). Pas de build, pas de dépendance : on ouvre `index.html` dans un navigateur, sur téléphone de préférence. Marche sans réseau : polices (Barlow Condensed 600 et 800), icônes et logo sont dans le fichier en base64.
+Chrono de reprises pour la canne de combat (club Les Cannes du Luco). Pas de build, pas de dépendance : on ouvre `index.html` dans un navigateur, sur téléphone de préférence. L'app tient dans `index.html` (polices Barlow Condensed 600 et 800 en base64 dedans). À côté, seulement ce qui sert à l'installer (PWA) : `manifest.webmanifest`, `sw.js`, `icons/`.
 
 Point de départ : `luco-chrono-hors-ligne (2).html` fourni par Pierre le 3/11/2026, copié tel quel en `index.html`. Le site du club est à part, dans `../cannes-du-luco`.
 
@@ -24,9 +24,9 @@ Point de départ : `luco-chrono-hors-ligne (2).html` fourni par Pierre le 3/11/2
 Remis au propre le 3/11/2026, sans changer le comportement (testé par de vrais clics : réglages, pause, temps d'arrêt, enchaînement des reprises, fin d'assaut).
 
 - **Mise en page** : titre « LUCO CHRONO » centré. Chaque écran (`.screen`) fait au plus 560 px de large, centré (tablette, ordi), et c'est un conteneur `container-type: size` : les tailles en `cqw`/`cqh` suivent l'écran. Titre et intitulés grandissent avec l'écran (`clamp`). Réglages : intitulés centrés, 12 px au-dessus de leur réglage. Les + et − des cercles sont **dessinés en CSS** (`.step::before/::after`, le nom du bouton est dans `aria-label`) : avec les caractères de la police, ils tombaient sous le centre. Les valeurs (`.ctl .v`) sont remontées de 0,05em pour être au niveau du centre des cercles (mesuré : écart restant < 0,2 px). Tailles vérifiées le 3/11/2026 en 320×568, 375×812 et 768×1024 : rien ne déborde.
-- Tout dans `index.html`. Lignes 1 à 14 : icônes et polices en base64 (lignes très longues, ne pas les toucher à la main). Ensuite : CSS par écran, HTML commenté, puis le script.
-- Script en sections : Réglages, Sons, Écran gardé allumé, Chrono, Boutons, Démarrage. Noms en français (`etat`, `reprise`, `finA`, `demarrerReprise`, `finirReprise`…).
-- Couleurs en tokens sur `:root` : `--noir #000`, `--rouge #e10600`, `--jaune #ffd400`, `--blanc #fff`, `--gris #2a2a2a` (fond de barre), `--gris-clair #9a9a9a` (pause), `--bleu #3fa9ff` (repos). Thème sombre uniquement.
+- Tout dans `index.html`. En tête : liens vers les icônes et le manifeste, réglages iPhone, puis les polices en base64 (2 lignes très longues dans le premier `<style>`, ne pas les toucher à la main). Ensuite : CSS par écran, HTML commenté, puis le script.
+- Script en sections : Réglages, Sons, Écran gardé allumé, Chrono, Boutons, Toujours en portrait, Hors ligne, Démarrage. Noms en français (`etat`, `reprise`, `finA`, `demarrerReprise`, `finirReprise`…).
+- Couleurs en tokens sur `:root` : `--noir #000`, `--rouge #e10600`, `--jaune #ffd400`, `--blanc #fff`, `--gris #2a2a2a` (fond de barre), `--gris-clair #8f8f8f` (pause), `--bleu #8ab4dc` (repos), `--rouge-doux #e06a60` (fin). Thème sombre uniquement.
 - Le temps se cale sur `Date.now()` (`finA`), pas sur le nombre de tops : pas de dérive.
 - États (`etat`) : `setup`, `run`, `paused`, `repos`, `between` (fin de reprise sans repos), `done`. Toujours passer par `changerEtat()`. Le gros bouton jaune (`#bPause`) change de rôle selon l'état. `dureeEnCours` = durée de ce qui tourne (reprise ou repos), pour la barre.
 - Tester : `python3 -m http.server 8765` dans le dossier (config dans `.claude/launch.json`), puis http://localhost:8765. La durée de test de 10 s (constante `TEST`) sert à vérifier une reprise vite.
@@ -35,7 +35,7 @@ Remis au propre le 3/11/2026, sans changer le comportement (testé par de vrais 
 
 1. ~~Pas de temps de repos~~ : fait le 3/11/2026.
 2. Mode test caché : sous 30 s, la durée passe à 10 s (constante `TEST`, jamais sauvée). Gardé pour l'instant, pratique pour tester.
-3. Pas installable comme une app (ni manifeste ni service worker). **Décision de Pierre (3/11/2026) : ce sera une PWA** (Android et iPhone, hors ligne obligatoire), à faire après l'audit UX/UI. APK écarté pour l'instant.
+3. ~~Pas installable~~ : PWA faite le 3/11/2026 (voir « Installation (PWA) »). APK écarté.
 4. iPhone : le bouton silencieux coupe les sons, pas de vibration ; écran verrouillé = pas de son.
 5. ~~Écran d'ouverture de 1,8 s~~ : réduit à 0,5 s le 3/11/2026.
 6. ~~Code compressé~~ : fait le 3/11/2026.
@@ -43,10 +43,19 @@ Remis au propre le 3/11/2026, sans changer le comportement (testé par de vrais 
 
 ## Pistes
 
-Pause pendant le repos (blessure, matériel), durée à la seconde, préréglages (entraînement, compétition), annonce vocale, historique des assauts, version installable.
+Pause pendant le repos (blessure, matériel), durée à la seconde, préréglages (entraînement, compétition), annonce vocale, historique des assauts.
+
+## Installation (PWA)
+
+Ajoutée le 3/11/2026. Hors ligne obligatoire (demande de Pierre).
+
+- `manifest.webmanifest` : nom, `display: standalone`, `orientation: portrait` (respecté sur Android ; sur iPhone c'est le CSS « Toujours en portrait » qui fait le travail), fond et thème noirs, icônes.
+- `icons/` : `icon.svg` (logo, coins arrondis), `icon-192.png`, `icon-512.png`, `icon-maskable-512.png` (fond plein, logo réduit à 80 % pour ne pas être rogné par les icônes rondes d'Android), `apple-touch-icon.png` (180 px, fond plein : iOS arrondit lui-même). PNG générés depuis le SVG avec `qlmanage` (pas d'autre outil d'image sur le Mac).
+- `sw.js` : met tous les fichiers en cache au premier passage, puis sert toujours le cache (marche en mode avion) et rafraîchit en arrière-plan : une modif de `index.html` arrive au lancement suivant, sans rien toucher. **Ajouter tout nouveau fichier à `FICHIERS` et changer `VERSION`.** Enregistré seulement sur un vrai site (pas en `file://`).
+- Testé le 3/11/2026 dans un Brave sans écran (protocole DevTools, profil temporaire) : aucune erreur de manifeste ni d'installation, et l'app se recharge réseau coupé (par `/` et par `/index.html`). Le navigateur intégré de l'app Claude refuse les service workers : il ne sert pas à tester ça. Pas encore testé sur un vrai iPhone ou Android.
 
 ## Publication
 
 - Code public sur GitHub : https://github.com/PJoessel/luco-chrono (branche `main`, créé le 3/11/2026). Licence MIT (`LICENSE`), police Barlow sous OFL (`OFL-Barlow.txt`, à garder tant que la police est intégrée). `README.md` en français, pour ceux qui veulent reprendre l'app pour leur club.
 - Commits signés « Pierre Joëssel » avec l'adresse masquée GitHub (`32869915+PJoessel@users.noreply.github.com`, réglée dans le dépôt seulement).
-- Hébergement du site : pas encore choisi (GitHub Pages recommandé), à faire avec la PWA.
+- Site en ligne avec **GitHub Pages** (branche `main`, racine) : https://pjoessel.github.io/luco-chrono/ . Chaque push sur `main` met le site à jour en une minute environ. Le README donne ce lien et le mode d'installation iPhone / Android.

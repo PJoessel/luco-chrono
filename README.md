@@ -2,6 +2,8 @@
 
 Chrono de reprises pour la **canne de combat**, fait au club Les Cannes du Luco. Pensé pour un téléphone posé au bord du tapis : gros chiffres, gros boutons, des sons pour chaque moment de l'assaut.
 
+👉 **Ouvrir l'app : https://pjoessel.github.io/luco-chrono/**
+
 ## Ce que fait l'app
 
 - **Réglages** : nombre de reprises, durée d'une reprise, repos entre les reprises (ou pas de repos). Ils sont retenus d'une fois sur l'autre.
@@ -10,29 +12,56 @@ Chrono de reprises pour la **canne de combat**, fait au club Les Cannes du Luco.
 - **Pause** à tout moment pendant une reprise, **Arrêter** avec confirmation.
 - Une couleur par état, lisible de loin : blanc = combat, rouge = fin, bleu = repos, gris = pause.
 - L'écran reste allumé pendant l'assaut, et l'app reste en portrait même si on tourne le téléphone.
-- **Marche sans réseau** : tout est dans un seul fichier, polices et sons compris.
+- **S'installe comme une app** sur iPhone et Android, et **marche sans réseau** une fois installée.
 
-## L'utiliser
+## L'installer sur son téléphone
 
-Ouvrir `index.html` dans un navigateur, sur téléphone de préférence. Pas d'installation, pas de compte, rien à configurer.
+Pas besoin de store : l'app s'installe depuis le navigateur. Il faut du réseau la première fois, ensuite elle marche **en mode avion**.
 
-Pour l'avoir sur son téléphone comme une vraie app, il faudra la version installable (PWA), en préparation.
+### iPhone (Safari)
+
+1. Ouvrir **https://pjoessel.github.io/luco-chrono/** dans **Safari**.
+2. Appuyer sur le bouton **Partager** (le carré avec une flèche vers le haut).
+3. Choisir **« Sur l'écran d'accueil »**, puis **« Ajouter »**.
+4. L'icône LUCO CHRONO apparaît sur l'écran d'accueil : l'app s'ouvre en plein écran.
+
+⚠️ Sur iPhone, le **bouton silencieux** coupe aussi les sons de l'app : le désactiver avant un assaut.
+
+### Android (Chrome)
+
+1. Ouvrir **https://pjoessel.github.io/luco-chrono/** dans **Chrome**.
+2. Appuyer sur le menu **⋮** en haut à droite.
+3. Choisir **« Installer l'application »** (ou **« Ajouter à l'écran d'accueil »** selon la version), puis confirmer.
+4. L'icône LUCO CHRONO apparaît avec les autres apps.
+
+### Mises à jour
+
+Rien à faire : quand l'app est ouverte avec du réseau, elle récupère la nouvelle version en arrière-plan, qui s'affiche au lancement suivant.
+
+### Sans installer
+
+Le lien marche aussi directement dans le navigateur, sur téléphone ou sur ordi.
 
 ## L'adapter pour ton club
 
-Tout le projet tient dans **un seul fichier, `index.html`**, sans outil ni dépendance : on le modifie avec n'importe quel éditeur de texte et on recharge la page.
+Toute l'app tient dans **un seul fichier, `index.html`**, sans outil ni dépendance : on le modifie avec n'importe quel éditeur de texte et on recharge la page. À côté, il n'y a que ce qui sert à l'installer : `manifest.webmanifest` (nom, icônes), `sw.js` (le hors ligne) et le dossier `icons/`.
 
 - **Couleurs** : en haut du fichier, dans `:root` (`--jaune`, `--rouge`, `--bleu`…).
 - **Textes** : en français dans le HTML et dans le script (« Lancer », « Repos », « Terminé »…).
 - **Réglages par défaut et limites** : dans le script, partie « Réglages » (`S = { n: 3, d: 120, r: 60 }`, en secondes).
 - **Sons** : partie « Sons » du script. Ils sont fabriqués par le navigateur (Web Audio), il n'y a aucun fichier son. La fonction `cloche` fait un ding : on choisit sa note, sa durée et son volume.
-- **Nom et logo** : « LUCO CHRONO » et son icône sont ceux de notre club. Si tu publies ta version, mets ton propre nom et ton logo (le titre dans le HTML, les icônes en base64 tout en haut du fichier).
+- **Nom et logo** : « LUCO CHRONO » et son icône sont ceux de notre club. Si tu publies ta version, mets ton propre nom et ton logo : le titre dans `index.html`, le nom dans `manifest.webmanifest`, et les images du dossier `icons/`.
+- **Fichiers ajoutés ou renommés** : les ajouter à la liste `FICHIERS` en haut de `sw.js` et changer `VERSION` (par exemple `luco-chrono-2`), pour qu'ils marchent aussi hors ligne. Pour une simple modif de `index.html`, rien à faire : les téléphones la récupèrent tout seuls.
 
 Le fichier `CLAUDE.md` décrit le code et les choix faits en détail. Il sert aussi de point de départ si tu modifies l'app avec Claude.
 
+### Le mettre en ligne
+
+Le plus simple : forker ce dépôt sur GitHub, puis activer **GitHub Pages** (Settings → Pages → branche `main`, dossier `/ (root)`). Le site est en ligne une minute après, à l'adresse `ton-pseudo.github.io/luco-chrono`, en https (obligatoire pour l'installation sur téléphone).
+
 ### Tester en local
 
-Ouvrir `index.html` suffit. Pour tester comme sur un vrai site :
+Ouvrir `index.html` suffit pour l'app. Pour tester aussi l'installation et le hors ligne, il faut passer par un petit serveur :
 
 ```bash
 python3 -m http.server 8765
