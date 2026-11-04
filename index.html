@@ -45,6 +45,8 @@ html, body {
   -webkit-tap-highlight-color: transparent;
   -webkit-user-select: none;
   user-select: none;
+  /* pas de zoom quand on tape vite deux fois (+ et −) ; le zoom à deux doigts reste possible */
+  touch-action: manipulation;
 }
 body { display: flex; flex-direction: column; container-type: size; }
 /* Chaque écran est un conteneur : les tailles en cqw/cqh suivent l'écran (largeur limitée et centrée sur tablette et ordi) */
@@ -121,6 +123,7 @@ h1 { margin: 4px 0 14px; text-align: center; font-size: clamp(30px, 10cqw, 44px)
   border-radius: 50%;
   position: relative;
   color: var(--jaune);
+  touch-action: manipulation;
 }
 .step:active { background: var(--jaune); color: var(--noir); }
 /* + et − dessinés en CSS : centrés au pixel près dans le cercle (le caractère de la police tombait trop bas) */

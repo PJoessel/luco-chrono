@@ -44,6 +44,7 @@ Remis au propre le 3/11/2026, sans changer le comportement (testé par de vrais 
 ## Relecture du 3/11/2026 (bugs et poids)
 
 - Poids : `index.html` 82 → 56 Ko (polices réduites), icônes PNG 53 → 16 Ko (palette 256 couleurs avec Pillow, rendu identique). Site complet : environ 80 Ko.
+- Zoom au double appui (vu par Pierre sur téléphone le 4/11/2026, en tapant vite sur + et −) : bloqué par `touch-action: manipulation` sur `html, body` et `.step`. Le zoom à deux doigts reste possible.
 - iPhone : `-webkit-user-select: none` (sinon l'appui long sélectionne du texte), son relancé si le contexte audio est « interrupted » (appel, veille) et au retour dans l'app, `dvh`/`dvw` pour la page tournée (100vh compte la barre d'adresse de Safari).
 - Android : `contextmenu` bloqué et `touch-action: none` sur le bouton jaune, sinon l'appui long de 1 s pouvait être annulé par le menu du navigateur.
 - Écran allumé pendant tout l'assaut, pause comprise (avant : seulement combat et repos au retour dans l'app), sans double demande.
