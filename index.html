@@ -101,8 +101,10 @@ button:focus-visible { outline: 4px solid var(--jaune); outline-offset: 3px; }
 
 /* ---------- Réglages ---------- */
 h1 { margin: 4px 0 14px; text-align: center; font-size: clamp(30px, 10cqw, 44px); font-weight: 600; color: var(--jaune); letter-spacing: .02em; }
-.rows { flex: 1; display: flex; flex-direction: column; justify-content: space-evenly; }
-.row { display: flex; flex-direction: column; gap: 12px; }
+/* Rythme : intitulé collé à son réglage (8 px), réglages bien séparés entre eux,
+   et le groupe des trois centré entre le titre et « Lancer » */
+.rows { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: clamp(28px, 6cqh, 56px); }
+.row { display: flex; flex-direction: column; gap: 8px; }
 .row > span { font-size: clamp(22px, 7.5cqw, 30px); font-weight: 600; color: var(--blanc); text-align: center; }
 .ctl { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .ctl .v {
@@ -187,7 +189,7 @@ h1 { margin: 4px 0 14px; text-align: center; font-size: clamp(30px, 10cqw, 44px)
 #run[data-etat="paused"] #digits { animation: clignote 1.6s ease-in-out infinite; }
 /* creux à 70 % : les chiffres gris gardent au moins 3:1 de contraste (3,5:1) */
 @keyframes clignote { 50% { opacity: .7; } }
-#sous { min-height: 1.2em; font-size: clamp(24px, 7cqw, 40px); font-weight: 600; line-height: 1.2; text-align: center; color: var(--gris-clair); }
+#sous { min-height: 1.2em; margin-top: 8px; font-size: clamp(24px, 7cqw, 40px); font-weight: 600; line-height: 1.2; text-align: center; color: var(--gris-clair); }
 .bar { height: 10px; background: var(--gris); border-radius: 5px; overflow: hidden; margin: 6px 0 14px; }
 /* la barre s'allonge par transform (pas de recalcul de mise en page à chaque top) */
 .bar i { display: block; height: 100%; background: var(--etat); transform: scaleX(0); transform-origin: left; }
