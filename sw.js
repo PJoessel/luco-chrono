@@ -9,7 +9,7 @@
    tout de suite (l'app se recharge sur l'écran des réglages, jamais pendant un
    assaut). Tout fichier ajouté ou renommé doit aussi aller dans FICHIERS. */
 
-const VERSION = "luco-chrono-7";
+const VERSION = "luco-chrono-8";
 const FICHIERS = [
   "./",
   "./index.html",
