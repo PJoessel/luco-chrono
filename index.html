@@ -160,7 +160,7 @@ h1 { margin: 4px 0 14px; text-align: center; font-size: clamp(30px, 10cqw, 44px)
 #run[data-etat="repos"] { --etat: var(--bleu); }
 #run[data-etat="between"], #run[data-etat="done"] { --etat: var(--rouge-doux); }
 
-.top { font-size: clamp(24px, 7cqw, 40px); font-weight: 600; }
+.top { text-align: center; font-size: clamp(28px, 8.5cqw, 48px); font-weight: 600; }
 .top b { font-weight: 800; }
 .mid { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 0; }
 #msg {
@@ -182,6 +182,8 @@ h1 { margin: 4px 0 14px; text-align: center; font-size: clamp(30px, 10cqw, 44px)
   transition: color .15s;
 }
 #digits.alerte { color: var(--rouge-doux); }
+/* en pause, gris même dans les 5 dernières secondes */
+#run[data-etat="paused"] #digits.alerte { color: var(--etat); }
 #run[data-etat="paused"] #digits { animation: clignote 1.6s ease-in-out infinite; }
 @keyframes clignote { 50% { opacity: .55; } }
 #sous { min-height: 1.2em; font-size: clamp(24px, 7cqw, 40px); font-weight: 600; line-height: 1.2; text-align: center; color: var(--gris-clair); }
@@ -214,20 +216,22 @@ h1 { margin: 4px 0 14px; text-align: center; font-size: clamp(30px, 10cqw, 44px)
 /* assaut fini : plus rien à arrêter */
 #run[data-etat="done"] #bStop { display: none; }
 
-/* ---------- Confirmation d'arrêt ---------- */
+/* ---------- Confirmation d'arrêt ----------
+   Posée en bas, à la place des boutons : le chrono reste visible au-dessus.
+   Toucher ailleurs ou Échap = Continuer. */
 #conf {
   position: fixed;
   inset: 0;
   z-index: 20;
-  background: rgba(0, 0, 0, .94);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, .96) 72%);
   display: none;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
-  padding: 24px;
+  padding: 0 18px max(16px, env(safe-area-inset-bottom, 0px));
 }
 #conf.on { display: flex; }
-#conf .box { width: 100%; max-width: 520px; text-align: center; }
-#conf p { font-size: clamp(36px, 10cqw, 60px); font-weight: 800; margin: 0 0 24px; line-height: 1.05; }
+#conf .box { width: 100%; max-width: 524px; text-align: center; }
+#conf p { font-size: clamp(28px, 8cqw, 44px); font-weight: 800; margin: 0 0 18px; line-height: 1.05; }
 #cNon { background: var(--jaune); color: var(--noir); }
 #cOui { background: var(--rouge); color: var(--blanc); }
 
@@ -309,9 +313,9 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
 </section>
 
 <!-- Confirmation d'arrêt -->
-<div id="conf">
+<div id="conf" role="alertdialog" aria-modal="true" aria-labelledby="confQ">
   <div class="box">
-    <p>Arrêter l’assaut et revenir aux réglages ?</p>
+    <p id="confQ">Arrêter l’assaut et revenir aux réglages ?</p>
     <div class="actions">
       <button id="cNon">Continuer</button>
       <button id="cOui">Arrêter</button>
@@ -565,10 +569,16 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
 
   function finirRepos() {
     clearInterval(minuteur);
+    reprise++;
+    lancerReprise(suite());
+  }
+
+  // Reprise suivante lancée (fin du repos, appui long, « Lancer la 2e ») :
+  // toujours les deux dings de départ, pour les tireurs qui ne regardent pas
+  function lancerReprise(debut) {
     depart();
     vibrer(300);
-    reprise++;
-    demarrerReprise(suite());
+    demarrerReprise(debut);
   }
 
   function lancerMinuteur() {
@@ -601,6 +611,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     chiffres("0:00");
 
     if (reprise >= S.n) {
+      fermerConf(); // plus rien à arrêter
       changerEtat("done");
       $("msg").textContent = "Terminé";
       $("sous").textContent = recap();
@@ -666,7 +677,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
       ignorerClic = true;
       clearInterval(minuteur);
       reprise++;
-      demarrerReprise();
+      lancerReprise();
     }, 1000);
   }
 
@@ -689,18 +700,33 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     else if (etat === "paused") reprendre();
     else if (etat === "between") {
       reprise++;
-      demarrerReprise();
+      lancerReprise();
     }
     else if (etat === "done") retourReglages();
     // repos : un simple appui ne fait rien, voir l'appui long
   });
 
-  $("bStop").addEventListener("click", () => $("conf").classList.add("on"));
-  $("cNon").addEventListener("click", () => $("conf").classList.remove("on"));
-  $("cOui").addEventListener("click", () => {
+  // Confirmation d'arrêt
+  const confOuverte = () => $("conf").classList.contains("on");
+
+  function fermerConf() {
+    if (!confOuverte()) return;
     $("conf").classList.remove("on");
+    if (etat !== "done") $("bStop").focus({ preventScroll: true });
+  }
+
+  $("bStop").addEventListener("click", () => {
+    $("conf").classList.add("on");
+    $("cNon").focus({ preventScroll: true });
+  });
+  $("cNon").addEventListener("click", fermerConf);
+  $("cOui").addEventListener("click", () => {
+    fermerConf();
     retourReglages();
   });
+  // toucher à côté de la question = Continuer
+  $("conf").addEventListener("click", (e) => { if (e.target === $("conf")) fermerConf(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") fermerConf(); });
 
   /* ---------- Toujours en portrait ----------
      Angle du téléphone : 90 = tourné vers la gauche, -90 ou 270 = vers la droite.
