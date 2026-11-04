@@ -66,7 +66,7 @@ button:focus-visible { outline: 4px solid var(--jaune); outline-offset: 3px; }
   align-items: center;
   justify-content: center;
   gap: 4cqh;
-  transition: opacity .45s;
+  transition: opacity .25s;
 }
 #splash.out { opacity: 0; pointer-events: none; }
 #splash h2 {
@@ -95,7 +95,7 @@ button:focus-visible { outline: 4px solid var(--jaune); outline-offset: 3px; }
   width: 100%;
   background: var(--rouge);
   transform-origin: left;
-  animation: ld .4s linear forwards;
+  animation: ld .15s linear forwards;
 }
 @keyframes ld { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
@@ -779,8 +779,8 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
   setTimeout(() => {
     const s = $("splash");
     s.classList.add("out");
-    setTimeout(() => { s.style.display = "none"; }, 500);
-  }, 500);
+    setTimeout(() => { s.style.display = "none"; }, 250);
+  }, 150); // l'app est prête en moins de 0,1 s : l'écran d'ouverture ne fait plus attendre
 })();
 </script>
 </body>
