@@ -146,7 +146,8 @@ h1 { margin: 4px 0 14px; text-align: center; font-size: clamp(30px, 10cqw, 44px)
 .step[data-d^="-"]::after { display: none; }
 .go {
   margin-top: 12px;
-  padding: 18px;
+  /* texte remonté de .04em (les lettres de la police tombent sous le centre), même hauteur de bouton */
+  padding: calc(18px - .04em) 18px calc(18px + .04em);
   background: var(--jaune);
   color: var(--noir);
   font-size: clamp(44px, 14cqw, 72px);
@@ -197,7 +198,8 @@ h1 { margin: 4px 0 14px; text-align: center; font-size: clamp(30px, 10cqw, 44px)
 .bar i { display: block; height: 100%; background: var(--etat); transform: scaleX(0); transform-origin: left; }
 .actions { display: flex; gap: 12px; }
 /* hauteur fixe : les boutons ne bougent pas quand leur texte change */
-.actions button { flex: 1; height: 2.3em; padding: 0 8px; font-size: clamp(34px, 10cqw, 56px); font-weight: 800; line-height: 1.1; letter-spacing: .02em; border-radius: 16px; }
+/* padding bas .08em : centre optique du texte (les lettres tombent .04em sous le centre) */
+.actions button { flex: 1; height: 2.3em; padding: 0 8px .08em; font-size: clamp(34px, 10cqw, 56px); font-weight: 800; line-height: 1.1; letter-spacing: .02em; border-radius: 16px; }
 #bPause {
   position: relative;
   overflow: hidden;
