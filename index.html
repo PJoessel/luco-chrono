@@ -448,6 +448,19 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     }
   }, true);
 
+  // iPhone : deux appuis rapides = zoom, même avec touch-action. Au 2e appui rapide,
+  // on bloque le geste (pas de zoom) et on déclenche nous-mêmes le bouton touché.
+  let dernierAppui = 0;
+  document.addEventListener("touchend", (e) => {
+    const maintenant = Date.now();
+    if (maintenant - dernierAppui < 350) {
+      e.preventDefault();
+      const b = e.target.closest && e.target.closest("button");
+      if (b) b.click();
+    }
+    dernierAppui = maintenant;
+  }, { passive: false });
+
   function vibrer(motif) {
     try { navigator.vibrate && navigator.vibrate(motif); } catch (e) {}
   }
@@ -613,6 +626,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     laisserEteindre();
     changerEtat("setup");
     montrer("setup");
+    if (aRecharger) location.reload();
   }
 
   function mettreEnPause() {
@@ -710,7 +724,17 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
      Sur un vrai site (pas en ouvrant le fichier), sw.js garde l'app en mémoire
      sur le téléphone : elle marche ensuite en mode avion. */
 
+  // Nouvelle version reçue : on recharge, mais seulement sur l'écran des réglages,
+  // jamais pendant un assaut (sinon au retour aux réglages, voir retourReglages).
+  let aRecharger = false;
+
   if ("serviceWorker" in navigator && location.protocol !== "file:") {
+    const dejaInstallee = !!navigator.serviceWorker.controller; // au tout premier passage, rien à recharger
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (!dejaInstallee) return;
+      if (etat === "setup") location.reload();
+      else aRecharger = true;
+    });
     navigator.serviceWorker.register("sw.js").catch(() => {});
   }
 

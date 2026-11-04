@@ -5,10 +5,11 @@
    réseau le cache est rafraîchi en arrière-plan : la nouvelle version s'affiche
    au lancement suivant.
 
-   Quand on ajoute ou renomme un fichier : l'ajouter à FICHIERS et changer VERSION
-   (le cache repart de zéro). Une simple modif d'un fichier n'a besoin de rien. */
+   Changer VERSION à chaque version publiée : les téléphones la prennent alors
+   tout de suite (l'app se recharge sur l'écran des réglages, jamais pendant un
+   assaut). Tout fichier ajouté ou renommé doit aussi aller dans FICHIERS. */
 
-const VERSION = "luco-chrono-2";
+const VERSION = "luco-chrono-3";
 const FICHIERS = [
   "./",
   "./index.html",

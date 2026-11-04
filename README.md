@@ -36,7 +36,7 @@ Pas besoin de store : l'app s'installe depuis le navigateur. Il faut du réseau 
 
 ### Mises à jour
 
-Rien à faire : quand l'app est ouverte avec du réseau, elle récupère la nouvelle version en arrière-plan, qui s'affiche au lancement suivant.
+Rien à faire : quand l'app est ouverte avec du réseau, elle récupère la nouvelle version et se recharge toute seule sur l'écran des réglages (jamais pendant un assaut).
 
 ### Sans installer
 
@@ -51,7 +51,7 @@ Toute l'app tient dans **un seul fichier, `index.html`**, sans outil ni dépenda
 - **Réglages par défaut et limites** : dans le script, partie « Réglages » (`S = { n: 3, d: 120, r: 60 }`, en secondes).
 - **Sons** : partie « Sons » du script. Ils sont fabriqués par le navigateur (Web Audio), il n'y a aucun fichier son. La fonction `cloche` fait un ding : on choisit sa note, sa durée et son volume.
 - **Nom et logo** : « LUCO CHRONO » et son icône sont ceux de notre club. Si tu publies ta version, mets ton propre nom et ton logo : le titre dans `index.html`, le nom dans `manifest.webmanifest`, et les images du dossier `icons/`.
-- **Fichiers ajoutés ou renommés** : les ajouter à la liste `FICHIERS` en haut de `sw.js` et changer `VERSION` (par exemple `luco-chrono-2`), pour qu'ils marchent aussi hors ligne. Pour une simple modif de `index.html`, rien à faire : les téléphones la récupèrent tout seuls.
+- **Après chaque modif publiée** : changer `VERSION` en haut de `sw.js` (par exemple `luco-chrono-4`). Les téléphones prennent alors la nouvelle version dès qu'ils sont sur l'écran des réglages (jamais pendant un assaut). Un fichier ajouté ou renommé doit aussi aller dans la liste `FICHIERS`, pour marcher hors ligne.
 
 Le fichier `CLAUDE.md` décrit le code et les choix faits en détail. Il sert aussi de point de départ si tu modifies l'app avec Claude.
 

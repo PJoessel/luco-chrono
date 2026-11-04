@@ -44,7 +44,9 @@ Remis au propre le 3/11/2026, sans changer le comportement (testé par de vrais 
 ## Relecture du 3/11/2026 (bugs et poids)
 
 - Poids : `index.html` 82 → 56 Ko (polices réduites), icônes PNG 53 → 16 Ko (palette 256 couleurs avec Pillow, rendu identique). Site complet : environ 80 Ko.
-- Zoom au double appui (vu par Pierre sur téléphone le 4/11/2026, en tapant vite sur + et −) : bloqué par `touch-action: manipulation` sur `html, body` et `.step`. Le zoom à deux doigts reste possible.
+- Zoom au double appui (vu par Pierre sur téléphone le 4/11/2026, en tapant vite sur + et −) : `touch-action: manipulation` sur `html, body` et `.step` **ne suffisait pas sur son téléphone**. En plus, écouteur `touchend` : un 2e appui à moins de 350 ms est bloqué (`preventDefault`, donc pas de zoom) et le bouton touché est déclenché à la main (`click()`), donc l'appui compte quand même, une seule fois. Le zoom à deux doigts reste possible.
+- Mises à jour : quand une nouvelle version de `sw.js` prend la main (`controllerchange`), l'app se recharge si elle est sur les réglages, sinon au retour aux réglages (`aRecharger`, jamais pendant un assaut). Pas au tout premier passage. **Changer `VERSION` dans `sw.js` à chaque version publiée** pour que les téléphones la reçoivent tout de suite.
+- Testé le 4/11/2026 avec de vrais appuis tactiles (Brave sans écran en mode téléphone, `Input.dispatchTouchEvent`) : appuis rapides comptés exactement (3 → 5 → 8), pas de zoom, double appui rapide sur Pause, appui court et appui long pendant le repos, recharge automatique sur les réglages.
 - iPhone : `-webkit-user-select: none` (sinon l'appui long sélectionne du texte), son relancé si le contexte audio est « interrupted » (appel, veille) et au retour dans l'app, `dvh`/`dvw` pour la page tournée (100vh compte la barre d'adresse de Safari).
 - Android : `contextmenu` bloqué et `touch-action: none` sur le bouton jaune, sinon l'appui long de 1 s pouvait être annulé par le menu du navigateur.
 - Écran allumé pendant tout l'assaut, pause comprise (avant : seulement combat et repos au retour dans l'app), sans double demande.
@@ -62,7 +64,7 @@ Ajoutée le 3/11/2026. Hors ligne obligatoire (demande de Pierre).
 
 - `manifest.webmanifest` : nom, `display: standalone`, `orientation: portrait` (respecté sur Android ; sur iPhone c'est le CSS « Toujours en portrait » qui fait le travail), fond et thème noirs, icônes.
 - `icons/` : `icon.svg` (logo, coins arrondis), `icon-192.png`, `icon-512.png`, `icon-maskable-512.png` (fond plein, logo réduit à 80 % pour ne pas être rogné par les icônes rondes d'Android), `apple-touch-icon.png` (180 px, fond plein : iOS arrondit lui-même). PNG générés depuis le SVG avec `qlmanage` (pas d'autre outil d'image sur le Mac).
-- `sw.js` : met tous les fichiers en cache au premier passage, puis sert toujours le cache (marche en mode avion) et rafraîchit en arrière-plan : une modif de `index.html` arrive au lancement suivant, sans rien toucher. **Ajouter tout nouveau fichier à `FICHIERS` et changer `VERSION`.** Enregistré seulement sur un vrai site (pas en `file://`).
+- `sw.js` : met tous les fichiers en cache au premier passage, puis sert toujours le cache (marche en mode avion) et rafraîchit en arrière-plan. **Changer `VERSION` à chaque version publiée** (l'app se recharge alors sur les réglages, voir plus haut) et ajouter tout nouveau fichier à `FICHIERS`. Enregistré seulement sur un vrai site (pas en `file://`).
 - Testé le 3/11/2026 dans un Brave sans écran (protocole DevTools, profil temporaire) : aucune erreur de manifeste ni d'installation, et l'app se recharge réseau coupé (par `/` et par `/index.html`). Le navigateur intégré de l'app Claude refuse les service workers : il ne sert pas à tester ça. Pas encore testé sur un vrai iPhone ou Android.
 
 ## Publication
