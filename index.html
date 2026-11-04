@@ -185,10 +185,12 @@ h1 { margin: 4px 0 14px; text-align: center; font-size: clamp(30px, 10cqw, 44px)
 /* en pause, gris même dans les 5 dernières secondes */
 #run[data-etat="paused"] #digits.alerte { color: var(--etat); }
 #run[data-etat="paused"] #digits { animation: clignote 1.6s ease-in-out infinite; }
-@keyframes clignote { 50% { opacity: .55; } }
+/* creux à 70 % : les chiffres gris gardent au moins 3:1 de contraste (3,5:1) */
+@keyframes clignote { 50% { opacity: .7; } }
 #sous { min-height: 1.2em; font-size: clamp(24px, 7cqw, 40px); font-weight: 600; line-height: 1.2; text-align: center; color: var(--gris-clair); }
 .bar { height: 10px; background: var(--gris); border-radius: 5px; overflow: hidden; margin: 6px 0 14px; }
-.bar i { display: block; height: 100%; width: 0; background: var(--etat); }
+/* la barre s'allonge par transform (pas de recalcul de mise en page à chaque top) */
+.bar i { display: block; height: 100%; background: var(--etat); transform: scaleX(0); transform-origin: left; }
 .actions { display: flex; gap: 12px; }
 /* hauteur fixe : les boutons ne bougent pas quand leur texte change */
 .actions button { flex: 1; height: 2.3em; padding: 0 8px; font-size: clamp(34px, 10cqw, 56px); font-weight: 800; line-height: 1.1; border-radius: 16px; }
@@ -528,6 +530,9 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     ["setup", "run"].forEach((s) => $(s).classList.toggle("on", s === id));
   }
 
+  // Barre de progression, de 0 (vide) à 1 (pleine)
+  const barre = (f) => { $("prog").style.transform = "scaleX(" + f + ")"; };
+
   function chiffres(texte, classe) {
     const d = $("digits");
     d.textContent = texte;
@@ -549,7 +554,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     $("msg").textContent = "";
     $("sous").textContent = "";
     boutonJaune("Pause");
-    $("prog").style.width = "0%";
+    barre(0);
     finA = debut + resteMs;
     lancerMinuteur();
   }
@@ -562,7 +567,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     $("msg").textContent = "Repos";
     $("sous").textContent = "";
     $("bPause").innerHTML = "Lancer<small>appui long</small>";
-    $("prog").style.width = "0%";
+    barre(0);
     finA = suite() + S.r * 1000;
     lancerMinuteur();
   }
@@ -600,14 +605,14 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
       if (sec <= 5) bip();
       chiffres(fmt(sec), sec <= 5 ? "alerte" : "");
     }
-    $("prog").style.width = (100 - reste / (dureeEnCours * 10)) + "%";
+    barre(1 - reste / (dureeEnCours * 1000));
   }
 
   function finirReprise() {
     clearInterval(minuteur);
     sonnerieFin();
     vibrer([400, 150, 400]);
-    $("prog").style.width = "100%";
+    barre(1);
     chiffres("0:00");
 
     if (reprise >= S.n) {
