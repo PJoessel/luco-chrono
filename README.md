@@ -1,4 +1,4 @@
-# LUCO CHRONO
+# CHRONO CANNE
 
 Chrono de reprises pour la **canne de combat**, créé par **Pierre Joëssel et Vincent Prunier** au club Les Cannes du Luco. Pensé pour un téléphone posé au bord du tapis : gros chiffres, gros boutons, des sons pour chaque moment de l'assaut.
 
@@ -24,7 +24,7 @@ Pas besoin de store : l'app s'installe depuis le navigateur. Il faut du réseau 
 1. Ouvrir **https://pjoessel.github.io/luco-chrono/** dans **Safari**.
 2. Appuyer sur le bouton **Partager** (le carré avec une flèche vers le haut).
 3. Choisir **« Sur l'écran d'accueil »**, puis **« Ajouter »**.
-4. L'icône LUCO CHRONO apparaît sur l'écran d'accueil : l'app s'ouvre en plein écran.
+4. L'icône CHRONO CANNE apparaît sur l'écran d'accueil : l'app s'ouvre en plein écran.
 
 ⚠️ Sur iPhone, le **bouton silencieux** coupe aussi les sons de l'app : le désactiver avant un assaut.
 
@@ -33,7 +33,7 @@ Pas besoin de store : l'app s'installe depuis le navigateur. Il faut du réseau 
 1. Ouvrir **https://pjoessel.github.io/luco-chrono/** dans **Chrome**.
 2. Appuyer sur le menu **⋮** en haut à droite.
 3. Choisir **« Installer l'application »** (ou **« Ajouter à l'écran d'accueil »** selon la version), puis confirmer.
-4. L'icône LUCO CHRONO apparaît avec les autres apps.
+4. L'icône CHRONO CANNE apparaît avec les autres apps.
 
 ### Mises à jour
 
@@ -51,7 +51,7 @@ Toute l'app tient dans **un seul fichier, `index.html`**, sans outil ni dépenda
 - **Textes** : en français dans le HTML et dans le script (« Lancer », « Repos », « Terminé »…).
 - **Réglages par défaut et limites** : dans le script, partie « Réglages » (`S = { n: 3, d: 120, r: 60 }`, en secondes).
 - **Sons** : partie « Sons » du script. Ils sont fabriqués par le navigateur (Web Audio), il n'y a aucun fichier son. La fonction `cloche` fait un ding : on choisit sa note, sa durée et son volume.
-- **Nom et logo** : « LUCO CHRONO » et son icône sont ceux de notre club. Si tu publies ta version, mets ton propre nom et ton logo : le titre dans `index.html`, le nom dans `manifest.webmanifest`, et les images du dossier `icons/`.
+- **Nom et logo** : « CHRONO CANNE » et son icône sont ceux de notre club. Si tu publies ta version, mets ton propre nom et ton logo : le titre dans `index.html`, le nom dans `manifest.webmanifest`, et les images du dossier `icons/`.
 - **Après chaque modif publiée** : changer `VERSION` en haut de `sw.js` (par exemple `luco-chrono-4`). Les téléphones prennent alors la nouvelle version dès qu'ils sont sur l'écran des réglages (jamais pendant un assaut). Un fichier ajouté ou renommé doit aussi aller dans la liste `FICHIERS`, pour marcher hors ligne.
 
 Le fichier `CLAUDE.md` décrit le code et les choix faits en détail. Il sert aussi de point de départ si tu modifies l'app avec Claude.

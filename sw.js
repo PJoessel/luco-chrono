@@ -1,4 +1,4 @@
-/* LUCO CHRONO : garde l'app en mémoire sur le téléphone pour qu'elle marche hors ligne.
+/* CHRONO CANNE : garde l'app en mémoire sur le téléphone pour qu'elle marche hors ligne.
 
    Au premier passage, tous les fichiers sont mis en cache. Ensuite l'app s'ouvre
    toujours depuis le cache (instantané, même en mode avion). Seule la page est
@@ -9,7 +9,7 @@
    tout de suite (l'app se recharge sur l'écran des réglages, jamais pendant un
    assaut). Tout fichier ajouté ou renommé doit aussi aller dans FICHIERS. */
 
-const VERSION = "luco-chrono-12";
+const VERSION = "luco-chrono-13";
 const FICHIERS = [
   "./",
   "./index.html",
