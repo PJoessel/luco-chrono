@@ -90,4 +90,5 @@ Ajoutée le 3/11/2026. Hors ligne obligatoire (demande de Pierre).
 
 - Code public sur GitHub : https://github.com/PJoessel/luco-chrono (branche `main`, créé le 3/11/2026). Licence MIT (`LICENSE`, © 2026 Pierre Joëssel et Vincent Prunier), police Barlow sous OFL (`OFL-Barlow.txt`, à garder tant que la police est intégrée). `README.md` en français, pour ceux qui veulent reprendre l'app pour leur club.
 - Commits signés « Pierre Joëssel » avec l'adresse masquée GitHub (`32869915+PJoessel@users.noreply.github.com`, réglée dans le dépôt seulement).
+- **Vincent Prunier** = compte GitHub `Moussaka47` (id 71925703). Chaque commit se termine aussi par `Co-Authored-By: Vincent Prunier <71925703+Moussaka47@users.noreply.github.com>` pour que GitHub l'affiche comme co-auteur. Invitation comme collaborateur (droits d'écriture) à faire par Pierre lui-même : Claude Code n'a pas le droit de donner des accès.
 - Site en ligne avec **GitHub Pages** (branche `main`, racine) : https://pjoessel.github.io/luco-chrono/ . Chaque push sur `main` met le site à jour en une minute environ. Le README donne ce lien et le mode d'installation iPhone / Android.
