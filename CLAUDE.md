@@ -86,11 +86,12 @@ Ajoutée le 3/11/2026. Hors ligne obligatoire (demande de Pierre).
 - `sw.js` : met tous les fichiers en cache au premier passage, puis sert toujours le cache (marche en mode avion). Seule la page est rafraîchie en arrière-plan ; icônes et manifeste sont servis du cache sans retéléchargement (refaits à chaque nouvelle `VERSION`). **Changer `VERSION` à chaque version publiée** (l'app se recharge alors sur les réglages, voir plus haut) et ajouter tout nouveau fichier à `FICHIERS`. Enregistré seulement sur un vrai site (pas en `file://`).
 - Testé le 3/11/2026 dans un Brave sans écran (protocole DevTools, profil temporaire) : aucune erreur de manifeste ni d'installation, et l'app se recharge réseau coupé (par `/` et par `/index.html`). Le navigateur intégré de l'app Claude refuse les service workers : il ne sert pas à tester ça. Pas encore testé sur un vrai iPhone ou Android.
 
-## Travail à deux (règles du 5/11/2026)
+## Travail à deux : envoyer sans rien écraser (règle de Pierre, 5/11/2026)
 
-Règles dans `.github/CONTRIBUTING.md` (pas dans le README, demande de Pierre) : jamais d'envoi direct sur `main`, une branche par modif, Pull Request relue par l'autre, tests de tous les états, `VERSION` changée, pas de `push --force`. **Claude suit aussi ces règles** : branche + Pull Request, pas de push direct sur `main`.
-- Vérification automatique `.github/workflows/verification.yml` sur chaque Pull Request : syntaxe du script de `index.html` et de `sw.js`, manifeste valide, fichiers de `FICHIERS` présents, `VERSION` changée si l'app est modifiée.
-- Sauvegardes : une étiquette annotée par version publiée qui marche (`v1` = refonte du 5/11/2026 avec Vincent co-créateur). Revenir en arrière : `git revert`, jamais de réécriture d'historique.
+Pierre et Vincent travaillent tous les deux sur le dépôt, souvent avec Claude. Juste ces règles, rien de plus (pas de protection de branche, pas de vérification automatique : essayés puis retirés à la demande de Pierre) :
+- **Toujours `git pull` avant `git push`**, pour récupérer ce que l'autre a envoyé et ne rien écraser. En cas de conflit, le résoudre en gardant les deux travaux, et demander si on ne sait pas lequel garder.
+- **Jamais de `git push --force`**, jamais de réécriture de l'historique (pas de `reset` sur un commit déjà envoyé). Pour annuler une modif : `git revert`.
+- **Sauvegardes** : une étiquette sur GitHub à chaque version qui marche bien (`git tag -a v2 -m "…"` puis `git push origin v2`). `v1` = refonte du 5/11/2026 avec Vincent co-créateur. Pour revenir à une version : `git revert` des commits fautifs, ou repartir du contenu de l'étiquette (`git checkout v1 -- .` puis un nouveau commit), toujours sans effacer l'historique. Proposer une étiquette à Pierre quand une version est publiée et validée.
 
 ## Publication
 
