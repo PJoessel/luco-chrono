@@ -10,6 +10,7 @@ Chrono de reprises pour la **canne de combat**, fait au club Les Cannes du Luco.
 - **Combat** : compte à rebours en blanc, un ding par seconde sur les 5 dernières secondes, trois dings à la fin.
 - **Repos** : démarre tout seul après chaque reprise, puis relance la suivante (deux dings aigus). Pour le couper, garder le doigt 1 seconde sur « Lancer ».
 - **Pause** à tout moment pendant une reprise, **Arrêter** avec confirmation.
+- Une **page d'infos** (le « i » en haut des réglages) : mode d'emploi, réglages du téléphone pour bien entendre les sons, installation.
 - Une couleur par état, lisible de loin : blanc = combat, rouge = fin, bleu = repos, gris = pause.
 - L'écran reste allumé pendant l'assaut, et l'app reste en portrait même si on tourne le téléphone.
 - **S'installe comme une app** sur iPhone et Android, et **marche sans réseau** une fois installée.
@@ -75,3 +76,4 @@ Astuce : en baissant la durée d'une reprise sous 30 s, on tombe sur une reprise
 
 - **Code** : licence MIT (voir `LICENSE`). Tu peux le reprendre, le modifier et le redistribuer librement, en gardant la mention d'auteur.
 - **Police Barlow Condensed** (intégrée au fichier) : SIL Open Font License 1.1, © The Barlow Project Authors (voir `OFL-Barlow.txt`).
+- **Police Anton** (intégrée au fichier, réduite, avec le « 1 » élargi à la largeur des autres chiffres) : SIL Open Font License 1.1, © The Anton Project Authors (voir `OFL-Anton.txt`).

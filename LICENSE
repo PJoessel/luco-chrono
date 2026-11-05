@@ -22,5 +22,7 @@ SOFTWARE.
 
 ---
 
-The embedded Barlow Condensed font is not covered by this license: it is
-distributed under the SIL Open Font License 1.1, see OFL-Barlow.txt.
+The embedded fonts are not covered by this license: they are distributed
+under the SIL Open Font License 1.1. Barlow Condensed: see OFL-Barlow.txt.
+Anton (subset, with the digit one widened to the width of the other digits):
+see OFL-Anton.txt.
