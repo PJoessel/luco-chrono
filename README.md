@@ -1,6 +1,6 @@
 # LUCO CHRONO
 
-Chrono de reprises pour la **canne de combat**, fait au club Les Cannes du Luco. Pensé pour un téléphone posé au bord du tapis : gros chiffres, gros boutons, des sons pour chaque moment de l'assaut.
+Chrono de reprises pour la **canne de combat**, créé par **Pierre Joëssel et Vincent Prunier** au club Les Cannes du Luco. Pensé pour un téléphone posé au bord du tapis : gros chiffres, gros boutons, des sons pour chaque moment de l'assaut.
 
 👉 **Ouvrir l'app : https://pjoessel.github.io/luco-chrono/**
 
@@ -74,6 +74,6 @@ Astuce : en baissant la durée d'une reprise sous 30 s, on tombe sur une reprise
 
 ## Licence
 
-- **Code** : licence MIT (voir `LICENSE`). Tu peux le reprendre, le modifier et le redistribuer librement, en gardant la mention d'auteur.
+- **Code** : licence MIT (voir `LICENSE`). © 2026 Pierre Joëssel et Vincent Prunier. Tu peux le reprendre, le modifier et le redistribuer librement, en gardant la mention des auteurs.
 - **Police Barlow Condensed** (intégrée au fichier) : SIL Open Font License 1.1, © The Barlow Project Authors (voir `OFL-Barlow.txt`).
 - **Police Anton** (intégrée au fichier, réduite, avec le « 1 » élargi à la largeur des autres chiffres) : SIL Open Font License 1.1, © The Anton Project Authors (voir `OFL-Anton.txt`).

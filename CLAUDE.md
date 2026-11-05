@@ -1,5 +1,7 @@
 # LUCO CHRONO
 
+**Créé par Pierre Joëssel et Vincent Prunier** (demande de Pierre, 5/11/2026) : toujours citer les deux quand on parle des créateurs du projet (licence MIT, README, pied de la page d'infos, description, crédits).
+
 Chrono de reprises pour la canne de combat (club Les Cannes du Luco). Pas de build, pas de dépendance : on ouvre `index.html` dans un navigateur, sur téléphone de préférence. L'app tient dans `index.html` (67 Ko, polices Barlow Condensed 600 et Anton en base64 dedans). À côté, seulement ce qui sert à l'installer (PWA) : `manifest.webmanifest`, `sw.js`, `icons/`.
 
 Point de départ : `luco-chrono-hors-ligne (2).html` fourni par Pierre le 3/11/2026, copié tel quel en `index.html`. Le site du club est à part, dans `../cannes-du-luco`.
@@ -86,6 +88,6 @@ Ajoutée le 3/11/2026. Hors ligne obligatoire (demande de Pierre).
 
 ## Publication
 
-- Code public sur GitHub : https://github.com/PJoessel/luco-chrono (branche `main`, créé le 3/11/2026). Licence MIT (`LICENSE`), police Barlow sous OFL (`OFL-Barlow.txt`, à garder tant que la police est intégrée). `README.md` en français, pour ceux qui veulent reprendre l'app pour leur club.
+- Code public sur GitHub : https://github.com/PJoessel/luco-chrono (branche `main`, créé le 3/11/2026). Licence MIT (`LICENSE`, © 2026 Pierre Joëssel et Vincent Prunier), police Barlow sous OFL (`OFL-Barlow.txt`, à garder tant que la police est intégrée). `README.md` en français, pour ceux qui veulent reprendre l'app pour leur club.
 - Commits signés « Pierre Joëssel » avec l'adresse masquée GitHub (`32869915+PJoessel@users.noreply.github.com`, réglée dans le dépôt seulement).
 - Site en ligne avec **GitHub Pages** (branche `main`, racine) : https://pjoessel.github.io/luco-chrono/ . Chaque push sur `main` met le site à jour en une minute environ. Le README donne ce lien et le mode d'installation iPhone / Android.
