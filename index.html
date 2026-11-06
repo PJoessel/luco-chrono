@@ -597,6 +597,12 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     cloche(1500, 1.2, .35, .18);
   }
 
+  // Retour haptique : une très brève vibration à chaque appui sur un bouton, comme le
+  // clavier d'un téléphone Android. À régler ici (en ms) : plus grand = plus marqué.
+  // Pas sur ordi (souris) ; sur iPhone l'API n'existe pas, donc rien ne se passe.
+  const HAPTIQUE_MS = 12;
+  let hapRefuse = false; // le navigateur a refusé le dernier tic (pas encore de geste validé)
+
   // Petit clic sur chaque bouton
   function clic() {
     if (!ac) return;
@@ -612,7 +618,15 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     if (e.target.closest && e.target.closest("button")) {
       debloquerSon();
       clic();
+      if (hapRefuse) { hapRefuse = false; vibrer(HAPTIQUE_MS); } // 1er appui : on rejoue le tic
     }
+  }, true);
+
+  // La vibration part dès que le doigt touche le bouton (pas au relâchement)
+  document.addEventListener("pointerdown", (e) => {
+    if (e.pointerType === "mouse") return;
+    const b = e.target.closest && e.target.closest("button");
+    if (b && !b.disabled) hapRefuse = vibrer(HAPTIQUE_MS) === false;
   }, true);
 
   // iPhone : deux appuis rapides = zoom, même avec touch-action. Au 2e appui rapide,
@@ -628,8 +642,9 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     dernierAppui = maintenant;
   }, { passive: false });
 
+  // Renvoie false si le navigateur refuse de vibrer
   function vibrer(motif) {
-    try { navigator.vibrate && navigator.vibrate(motif); } catch (e) {}
+    try { return navigator.vibrate && navigator.vibrate(motif); } catch (e) {}
   }
 
   /* ---------- Écran gardé allumé ---------- */
