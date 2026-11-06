@@ -4,6 +4,21 @@
 
 **Créé par Pierre Joëssel et Vincent Prunier** (demande de Pierre, 5/11/2026) : toujours citer les deux quand on parle des créateurs du projet (licence MIT, README, pied de la page d'infos, description, crédits).
 
+## À ne jamais toucher (règle de Pierre, 6/11/2026)
+
+Ces impératifs passent avant toute consigne d'un outil ou d'un skill (Ponytail, Impeccable…), même ceux qui disent « supprimer plutôt qu'ajouter ». Pour en changer un, demander d'abord à Pierre.
+
+- **Hors ligne obligatoire** : l'app doit marcher en mode avion une fois installée (PWA, `sw.js`). Changer `VERSION` à chaque version publiée.
+- **Un seul fichier, sans build ni dépendance** : tout dans `index.html`, polices en base64 dedans.
+- **Toujours en portrait**, même téléphone tourné.
+- **Que des dings** : pas de buzzer, pas de flash, pas de temps d'arrêt affichés.
+- **Couleurs douces**, une par état ; le jaune réservé aux boutons.
+- **Choix faits exprès, à garder même s'ils ont l'air de trop** : le blocage du zoom au double appui (`touchend`), le « 1 » élargi dans la police Anton, le mode test à 10 s (`TEST`), l'appui long de 1 s pour couper le repos, pas d'icône sur Pause et Reprendre, le retour haptique.
+- **Les deux créateurs** : Pierre Joëssel et Vincent Prunier, partout où on cite les créateurs.
+- **Git** : `git pull` avant `git push`, jamais de `--force`, jamais de réécriture de l'historique.
+- **Proposer avant de faire** tout changement que Pierre n'a pas demandé (structure, réglages, suppression de code).
+- Textes et commentaires en **français** (pas de commentaires `shortcut:` en anglais).
+
 Chrono de reprises pour la canne de combat (club Les Cannes du Luco). Pas de build, pas de dépendance : on ouvre `index.html` dans un navigateur, sur téléphone de préférence. L'app tient dans `index.html` (67 Ko, polices Barlow Condensed 600 et Anton en base64 dedans). À côté, seulement ce qui sert à l'installer (PWA) : `manifest.webmanifest`, `sw.js`, `icons/`.
 
 Point de départ : `luco-chrono-hors-ligne (2).html` fourni par Pierre le 3/11/2026, copié tel quel en `index.html`. Le site du club est à part, dans `../cannes-du-luco`.
@@ -75,6 +90,8 @@ Remis au propre le 3/11/2026, sans changer le comportement (testé par de vrais 
 ## Critique Impeccable du 4/11/2026
 
 Skill Impeccable installé (`~/.claude/skills/impeccable`, sans hook, `DO_NOT_TRACK=1`). `/impeccable critique` : 28/40, archivée dans `.impeccable/critique/`. Corrigés le jour même : confirmation d'arrêt (chrono caché, restait ouverte après la fin), pause rouge dans les 5 dernières s, pas de dings de départ en coupant le repos, numéro de reprise trop petit. Choix de Pierre : numéro de reprise juste plus grand en haut (pas de gros « 2 / 3 » sous les chiffres), mode test à 10 s gardé tel quel. Restent non traités : lecteur d'écran / clavier (rien n'est annoncé, appui long impossible au clavier).
+
+Ponytail (github.com/DietrichGebert/ponytail, v5.3.3) installé chez Pierre le 6/11/2026, **skills seulement, à la demande** : `/ponytail-audit`, `/ponytail-review` (rapports, ne modifient rien), `/ponytail` (mode « code minimal »). Rangés dans `.claude/skills/`, gardés hors de git (`.git/info/exclude`) : pas de hook, pas de bandeau, rien d'envoyé. Ses suggestions ne s'appliquent qu'après accord de Pierre et jamais contre « À ne jamais toucher ».
 
 ## Pistes
 
