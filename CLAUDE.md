@@ -70,7 +70,7 @@ Remis au propre le 3/11/2026, sans changer le comportement (testé par de vrais 
 1. ~~Pas de temps de repos~~ : fait le 3/11/2026.
 2. Mode test caché : sous 30 s, la durée passe à 10 s (constante `TEST`, jamais sauvée). Gardé pour l'instant, pratique pour tester.
 3. ~~Pas installable~~ : PWA faite le 3/11/2026 (voir « Installation (PWA) »). APK écarté.
-4. iPhone : pas de vibration (Safari ne sait pas vibrer) ; écran verrouillé = pas de son. Mode silencieux : depuis le 6/11/2026, `navigator.audioSession.type = "playback"` (iOS 17 et plus) fait sonner l'app quand même ; sur les iPhone plus anciens, il coupe toujours les sons (d'où le conseil « Pas de son sur iPhone ? » de la page d'infos et du README). Gardé par Pierre en connaissant le risque (audit Ponytail du 6/11/2026) : un « lecteur de sons » peut couper la musique jouée sur le même iPhone. Pas encore vérifié sur un vrai iPhone (silencieux, musique).
+4. iPhone : pas de vibration (Safari ne sait pas vibrer) ; écran verrouillé = pas de son. Mode silencieux : depuis le 6/11/2026, `navigator.audioSession.type = "playback"` (iOS 17 et plus) fait sonner l'app quand même ; sur les iPhone plus anciens, il coupe toujours les sons (d'où le conseil « Pas de son sur iPhone ? » de la page d'infos et du README). Testé par Pierre sur son iPhone le 6/11/2026 : l'app sonne bien en silencieux, et elle coupe la musique jouée sur le même iPhone. Gardé ainsi : pas de musique pendant les entraînements du club.
 5. ~~Écran d'ouverture de 1,8 s~~ : réduit à 0,5 s le 3/11/2026.
 6. ~~Code compressé~~ : fait le 3/11/2026.
 7. ~~Temps d'arrêt affichés sur « Prêt »~~ : l'étape « Prêt » n'existe plus (3/11/2026).
