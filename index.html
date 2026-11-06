@@ -222,16 +222,16 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(
 .defile section { margin-top: 26px; }
 .defile h3 { margin: 0 0 10px; font-family: var(--display); font-weight: 400; font-size: clamp(24px, 7.5cqw, 32px); line-height: 1.1; letter-spacing: .02em; }
 .defile p, .defile li { margin: 0; font-size: clamp(18px, 5.4cqw, 22px); line-height: 1.35; color: var(--pale); text-wrap: pretty; }
-.defile p + p, .defile p + ul, .defile p + ol { margin-top: 8px; }
+.defile p + p, .defile p + ul, .defile ul + p { margin-top: 8px; }
 .defile ul, .defile ol { margin: 0; padding-left: 1.2em; }
 .defile li + li { margin-top: 6px; }
 .defile li::marker { color: var(--jaune); }
 .defile b { color: var(--blanc); }
-.defile h4 { margin: 14px 0 6px; font-size: clamp(18px, 5.4cqw, 22px); color: var(--blanc); }
+.defile h4 { margin: 16px 0 6px; font-size: clamp(18px, 5.4cqw, 22px); color: var(--blanc); }
 /* le point le plus important : mis en avant dans une carte légèrement teintée */
 .defile .important { padding: 18px 20px; background: color-mix(in srgb, var(--jaune) 12%, var(--carte)); border-radius: clamp(20px, 6cqw, 28px); }
 .defile .important h3 { color: var(--jaune); }
-.pied { margin-top: 32px; text-align: center; font-size: 16px; color: var(--gris-clair); }
+.defile .pied { margin-top: 32px; text-align: center; font-size: 16px; color: var(--gris-clair); }
 .pied a { color: var(--jaune); text-underline-offset: 3px; }
 
 /* ---------- Chrono ----------
@@ -419,41 +419,47 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     <section>
       <h3>Comment ça marche</h3>
       <ul>
-        <li>Règle le nombre de reprises, leur durée et le repos entre deux reprises, puis appuie sur <b>Lancer</b>. Tes réglages sont retenus pour la prochaine fois.</li>
-        <li>Pendant une reprise : un ding par seconde sur les 5 dernières secondes, puis trois dings à la fin.</li>
-        <li>Le repos démarre tout seul. À la fin, deux dings aigus et la reprise suivante part toute seule.</li>
-        <li>Envie de repartir avant la fin du repos ? Garde le doigt 1 seconde sur <b>Lancer</b>.</li>
-        <li><b>Pause</b> à tout moment pendant une reprise. <b>Arrêter</b> demande toujours une confirmation.</li>
+        <li>Choisis le nombre de reprises, leur durée et le temps de repos entre deux reprises, puis appuie sur <b>Lancer</b>. L’app garde tes réglages pour la prochaine fois.</li>
+        <li>Pendant une reprise, un ding sonne chaque seconde sur les 5 dernières secondes. À la fin de la reprise, trois dings.</li>
+        <li>Le repos démarre tout seul. À la fin du repos, deux dings aigus, et la reprise suivante démarre toute seule.</li>
+        <li>Pour lancer la reprise suivante avant la fin du repos, garde le doigt appuyé 1 seconde sur <b>Lancer</b>.</li>
+        <li><b>Pause</b> arrête le temps pendant une reprise. <b>Arrêter</b> met fin à l’assaut, après une confirmation.</li>
       </ul>
     </section>
     <section class="important">
       <h3>Pour entendre les sons</h3>
       <ul>
-        <li><b>Sur iPhone, le bouton silencieux coupe aussi les sons de l’app.</b> Désactive-le avant l’assaut.</li>
-        <li>Monte le volume.</li>
-        <li>Garde l’app ouverte à l’écran. L’écran reste allumé tout seul pendant l’assaut, mais si tu verrouilles le téléphone ou que tu changes d’app, il n’y a plus de sons.</li>
+        <li><b>Sur iPhone, désactive le mode silencieux.</b> Sinon, l’app ne fait aucun son.</li>
+        <li>Monte le volume du téléphone.</li>
+        <li>Laisse l’app ouverte à l’écran pendant l’assaut. L’écran reste allumé tout seul, mais si tu verrouilles le téléphone ou que tu passes sur une autre app, les sons s’arrêtent.</li>
       </ul>
     </section>
     <section>
       <h3>Installer l’app</h3>
-      <p>Pas besoin de store : l’app s’installe depuis le navigateur.</p>
+      <p>Pas besoin de passer par l’App Store ou le Play Store : l’app s’installe directement depuis le navigateur, en une minute.</p>
       <h4>iPhone</h4>
       <ol>
-        <li>Ouvre <b>pjoessel.github.io/luco-chrono</b> dans <b>Safari</b>.</li>
-        <li>Appuie sur <b>Partager</b> (le carré avec une flèche vers le haut).</li>
-        <li>Choisis <b>« Sur l’écran d’accueil »</b>, puis <b>« Ajouter »</b>.</li>
+        <li>Ouvre <b>Safari</b> (pas un autre navigateur : seul Safari sait installer l’app).</li>
+        <li>Va sur <b>pjoessel.github.io/luco-chrono</b>.</li>
+        <li>Appuie sur le bouton <b>Partager</b> : le carré avec une flèche vers le haut. Sur les iPhone récents, il se trouve dans le menu <b>« ••• »</b> à côté de l’adresse.</li>
+        <li>Descends dans la liste et choisis <b>« Sur l’écran d’accueil »</b>.</li>
+        <li>Appuie sur <b>« Ajouter »</b> en haut à droite.</li>
+        <li>L’icône CHRONO CANNE apparaît sur l’écran d’accueil. L’app s’ouvre en plein écran, comme une vraie app.</li>
       </ol>
       <h4>Android</h4>
       <ol>
-        <li>Ouvre le même lien dans <b>Chrome</b>.</li>
-        <li>Appuie sur le menu (les trois points en haut à droite).</li>
-        <li>Choisis <b>« Installer l’application »</b> (ou <b>« Ajouter à l’écran d’accueil »</b>), puis confirme.</li>
+        <li>Ouvre <b>Chrome</b>.</li>
+        <li>Va sur <b>pjoessel.github.io/luco-chrono</b>.</li>
+        <li>Appuie sur le menu : les trois points en haut à droite.</li>
+        <li>Choisis <b>« Installer l’application »</b> ou <b>« Ajouter à l’écran d’accueil »</b> (le nom change selon les téléphones).</li>
+        <li>Confirme avec <b>« Installer »</b>.</li>
+        <li>L’icône CHRONO CANNE apparaît avec les autres apps.</li>
       </ol>
     </section>
     <section>
-      <h3>Sans internet</h3>
-      <p>Une fois installée, l’app marche en mode avion. Il faut juste du réseau la première fois.</p>
-      <p>Les mises à jour arrivent toutes seules quand tu as du réseau, jamais pendant un assaut.</p>
+      <h3>Sans réseau</h3>
+      <p>Une fois installée, l’app marche aussi en mode avion.</p>
+      <p>Les mises à jour arrivent toutes seules : quand l’app est ouverte avec du réseau, elle récupère la nouvelle version et se recharge sur l’écran des réglages, jamais pendant un assaut.</p>
     </section>
     <p class="pied">Par Pierre Joëssel et Vincent Prunier, au club Les Cannes du Luco · <a href="https://github.com/PJoessel/luco-chrono" target="_blank" rel="noopener">le code sur GitHub</a></p>
   </div>
