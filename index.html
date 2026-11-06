@@ -40,8 +40,6 @@
   --texte: "Barlow Condensed", "Arial Narrow", sans-serif;
   color-scheme: dark;
   box-sizing: border-box;
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 *, *::before, *::after { box-sizing: inherit; }
 html, body {
@@ -56,8 +54,20 @@ html, body {
   user-select: none;
   /* pas de zoom quand on tape vite deux fois (+ et −) ; le zoom à deux doigts reste possible */
   touch-action: manipulation;
+  /* jamais de défilement de la page (iPhone : elle glissait sous la barre d'état) */
+  overflow: hidden;
+  overscroll-behavior: none;
 }
-body { display: flex; flex-direction: column; container-type: size; }
+/* page clouée à l'écran : rien ne peut la faire glisser ; marges pour l'encoche et la barre du bas */
+body {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  container-type: size;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
 /* Chaque écran est un conteneur : les tailles en cqw/cqh suivent l'écran (largeur limitée et centrée sur tablette et ordi) */
 .screen { flex: 1; display: none; flex-direction: column; width: 100%; max-width: 560px; align-self: center; padding: 16px 18px; min-height: 0; container-type: size; }
 .screen.on { display: flex; }
@@ -65,9 +75,6 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 button:focus-visible, a:focus-visible { outline: 4px solid var(--jaune); outline-offset: 3px; }
 .carte { background: var(--carte); border-radius: clamp(20px, 6cqw, 28px); }
 
-/* Icônes dessinées en CSS (pas de caractères) */
-.ico { display: inline-block; flex: none; width: .52em; height: .62em; background: currentColor; }
-.ico.play { clip-path: polygon(6% 0, 100% 50%, 6% 100%); }
 
 /* Bouton rond (infos, retour) : petit anneau fin de 30 px, dessiné dans une zone de toucher de 44 px */
 .rond {
@@ -165,7 +172,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(
   color: var(--jaune);
   touch-action: manipulation;
 }
-.step:active { background: var(--jaune); border-color: var(--jaune); color: var(--noir); }
+.step:not(:disabled):active { background: var(--jaune); border-color: var(--jaune); color: var(--noir); }
 /* + et − dessinés en CSS : centrés au pixel près dans le cercle */
 .step::before, .step::after {
   content: "";
@@ -180,12 +187,13 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(
 }
 .step::after { transform: translate(-50%, -50%) rotate(90deg); }
 .step[data-d^="-"]::after { display: none; }
+/* limite atteinte (1 ou 20 reprises, 3:00…) : le bouton s'efface, l'appui ne fait rien */
+.step:disabled { opacity: .3; cursor: default; }
 .go {
   margin-top: clamp(10px, 2cqh, 18px);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: .28em;
   height: clamp(64px, 12cqh, 96px);
   border-radius: 999px;
   background: var(--jaune);
@@ -297,8 +305,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(
   letter-spacing: .02em;
   white-space: nowrap;
 }
-.actions .lig { display: flex; align-items: center; gap: .26em; }
-/* textes longs (« Lancer la 10e ») : un peu plus petits pour tenir sur une ligne en 320 px */
+/* « Lancer la 10e » et plus : un peu plus petit pour tenir sur une ligne en 320 px */
 .actions .lig.serre { font-size: .84em; }
 #bPause {
   position: relative;
@@ -366,6 +373,7 @@ html.tourne-g body, html.tourne-d body {
   transform-origin: top left;
   /* l'encoche est en haut du téléphone, donc en haut de la page tournée */
   padding-top: max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+  padding-bottom: 0;
 }
 html.tourne-g body { transform: translateY(100dvh) rotate(-90deg); }
 html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
@@ -388,9 +396,9 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
       <button class="step" data-k="n" data-d="1" aria-label="Plus de reprises"></button>
     </div>
     <div class="carte reglage">
-      <button class="step" data-k="d" data-d="-30" aria-label="Réduire de 30 secondes"></button>
+      <button class="step" data-k="d" data-d="-30" aria-label="Raccourcir la reprise de 30 secondes"></button>
       <div class="milieu"><span class="lib">Durée d’une reprise</span><div class="v" id="vD">2:00</div></div>
-      <button class="step" data-k="d" data-d="30" aria-label="Allonger de 30 secondes"></button>
+      <button class="step" data-k="d" data-d="30" aria-label="Allonger la reprise de 30 secondes"></button>
     </div>
     <div class="carte reglage">
       <button class="step" data-k="r" data-d="-30" aria-label="Raccourcir le repos de 30 secondes"></button>
@@ -398,7 +406,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
       <button class="step" data-k="r" data-d="30" aria-label="Allonger le repos de 30 secondes"></button>
     </div>
   </div>
-  <button class="go" id="bGo"><i class="ico play"></i>Lancer</button>
+  <button class="go" id="bGo">Lancer</button>
 </section>
 
 <!-- Infos : seulement depuis les réglages -->
@@ -519,6 +527,9 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     $("vN").textContent = S.n;
     $("vD").textContent = fmt(S.d);
     $("vR").textContent = S.r ? fmt(S.r) : "Non";
+    // + et − grisés à la limite (le − de la durée descend jusqu'au mode test)
+    const lim = { n: [1, 20], d: [TEST, 180], r: [0, 180] };
+    document.querySelectorAll(".step").forEach((b) => { b.disabled = S[b.dataset.k] === lim[b.dataset.k][b.dataset.d < 0 ? 0 : 1]; });
     try {
       if (S.d !== TEST) localStorage.setItem(CLE, JSON.stringify(S));
     } catch (e) {}
@@ -766,10 +777,11 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     d.className = "digits" + (classe ? " " + classe : "");
   }
 
-  // Gros bouton jaune : icône dessinée en CSS (play, pause ou aucune), texte, et petit texte dessous
-  function boutonJaune(texte, icone, petit) {
+  // Gros bouton jaune : texte, et petit texte dessous.
+  // « Lancer la 10e » à côté d'« Arrêter » : texte un peu réduit pour tenir en 320 px
+  function boutonJaune(texte, petit) {
     const b = $("bPause");
-    b.innerHTML = '<span class="lig' + (icone && texte.length > 11 ? " serre" : "") + '">' + (icone ? '<i class="ico ' + icone + '"></i>' : "") + texte + "</span>" +
+    b.innerHTML = '<span class="lig' + (etat === "between" && texte.length > 12 ? " serre" : "") + '">' + texte + "</span>" +
       (petit ? "<small>" + petit + "</small>" : "");
     b.classList.remove("appui");
   }
@@ -793,7 +805,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     dureeEnCours = S.r;
     $("msg").textContent = "Repos";
     $("sous").textContent = "";
-    boutonJaune("Lancer", "play", "appui long");
+    boutonJaune("Lancer", "appui long");
     barre(0);
     finA = suite() + S.r * 1000;
     lancerMinuteur();
@@ -857,7 +869,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
       changerEtat("between");
       $("msg").textContent = "Fin";
       $("sous").textContent = "";
-      boutonJaune("Lancer la " + ordinal(reprise + 1), "play");
+      boutonJaune("Lancer la " + ordinal(reprise + 1));
     }
   }
 
