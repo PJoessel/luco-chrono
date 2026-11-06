@@ -9,10 +9,9 @@
    tout de suite (l'app se recharge sur l'écran des réglages, jamais pendant un
    assaut). Tout fichier ajouté ou renommé doit aussi aller dans FICHIERS. */
 
-const VERSION = "luco-chrono-14";
+const VERSION = "luco-chrono-15";
 const FICHIERS = [
-  "./",
-  "./index.html",
+  "./index.html", // ouvrir « / » sert aussi cette copie (voir fetch)
   "./manifest.webmanifest",
   "./icons/icon.svg",
   "./icons/icon-192.png",
@@ -22,7 +21,8 @@ const FICHIERS = [
 ];
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(FICHIERS)).then(() => self.skipWaiting()));
+  // cache: "reload" : vrai téléchargement, sinon le navigateur peut resservir l'ancienne page (gardée 10 min)
+  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(FICHIERS.map((f) => new Request(f, { cache: "reload" })))).then(() => self.skipWaiting()));
 });
 
 // On supprime les caches des anciennes versions

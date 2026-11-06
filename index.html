@@ -68,8 +68,6 @@ button:focus-visible, a:focus-visible { outline: 4px solid var(--jaune); outline
 /* Icônes dessinées en CSS (pas de caractères) */
 .ico { display: inline-block; flex: none; width: .52em; height: .62em; background: currentColor; }
 .ico.play { clip-path: polygon(6% 0, 100% 50%, 6% 100%); }
-/* deux barres : un seul polygone, sans bord en haut entre les barres */
-.ico.pause { width: .5em; clip-path: polygon(0 0, 38% 0, 38% 100%, 62% 100%, 62% 0, 100% 0, 100% 100%, 0 100%); }
 
 /* Bouton rond (infos, retour) : petit anneau fin de 30 px, dessiné dans une zone de toucher de 44 px */
 .rond {
@@ -502,8 +500,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     const o = JSON.parse(localStorage.getItem(CLE));
     if (o && o.n) {
       S.n = +o.n || S.n;
-      // anciennes sauvegardes : minutes (m) et secondes (s) séparées
-      S.d = +o.d || (+o.m || 0) * 60 + (+o.s || 0) || S.d;
+      S.d = +o.d || S.d;
       if (Number.isFinite(+o.r)) S.r = +o.r;
     }
   } catch (e) {}
@@ -908,11 +905,12 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
   let ignorerClic = false; // le clic qui suit un appui long réussi ne compte pas
 
   function debutAppui() {
-    ignorerClic = false;
-    if (etat !== "repos") return;
+    // un appui commencé pendant le repos n'est jamais un clic, même si la reprise part entre-temps
+    ignorerClic = etat === "repos";
+    if (!ignorerClic) return;
     $("bPause").classList.add("appui");
     minuteurAppui = setTimeout(() => {
-      ignorerClic = true;
+      if (etat !== "repos") return; // le repos a fini tout seul : la reprise est déjà lancée
       clearInterval(minuteur);
       reprise++;
       lancerReprise();
