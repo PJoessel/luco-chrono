@@ -24,7 +24,7 @@ Pas besoin de passer par l'App Store ou le Play Store : l'app s'installe directe
 5. Appuyer sur **« Ajouter »** en haut à droite.
 6. L'icône CHRONO CANNE apparaît sur l'écran d'accueil. L'app s'ouvre en plein écran, comme une vraie app.
 
-⚠️ Sur iPhone, le **mode silencieux** coupe aussi les sons de l'app : le désactiver avant un assaut.
+⚠️ **Pas de son sur iPhone ?** Désactiver le mode silencieux. Sur les iPhone récents, l'app sonne même en silencieux, mais pas sur les plus anciens.
 
 ### Android
 

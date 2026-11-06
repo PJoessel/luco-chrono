@@ -429,7 +429,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     <section class="important">
       <h3>Pour entendre les sons</h3>
       <ul>
-        <li><b>Sur iPhone, désactive le mode silencieux.</b> Sinon, l’app ne fait aucun son.</li>
+        <li><b>Pas de son sur iPhone ?</b> Désactive le mode silencieux. Sur les iPhone récents, l’app sonne même en silencieux, mais pas sur les plus anciens.</li>
         <li>Monte le volume du téléphone.</li>
         <li>Laisse l’app ouverte à l’écran pendant l’assaut. L’écran reste allumé tout seul, mais si tu verrouilles le téléphone ou que tu passes sur une autre app, les sons s’arrêtent.</li>
       </ul>
@@ -560,6 +560,9 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
   /* ---------- Sons (fabriqués en Web Audio, aucun fichier) ---------- */
 
   let ac = null;
+
+  // iPhone (iOS 17 et plus) : l'app se déclare « lecteur de sons », pour sonner même en mode silencieux
+  try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
 
   // Le navigateur n'autorise le son qu'après un geste de l'utilisateur
   function debloquerSon() {

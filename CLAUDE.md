@@ -70,7 +70,7 @@ Remis au propre le 3/11/2026, sans changer le comportement (testé par de vrais 
 1. ~~Pas de temps de repos~~ : fait le 3/11/2026.
 2. Mode test caché : sous 30 s, la durée passe à 10 s (constante `TEST`, jamais sauvée). Gardé pour l'instant, pratique pour tester.
 3. ~~Pas installable~~ : PWA faite le 3/11/2026 (voir « Installation (PWA) »). APK écarté.
-4. iPhone : le bouton silencieux coupe les sons, pas de vibration ; écran verrouillé = pas de son.
+4. iPhone : pas de vibration (Safari ne sait pas vibrer) ; écran verrouillé = pas de son. Mode silencieux : depuis le 6/11/2026, `navigator.audioSession.type = "playback"` (iOS 17 et plus) fait sonner l'app quand même ; sur les iPhone plus anciens, il coupe toujours les sons (d'où le conseil « Pas de son sur iPhone ? » de la page d'infos et du README). Gardé par Pierre en connaissant le risque (audit Ponytail du 6/11/2026) : un « lecteur de sons » peut couper la musique jouée sur le même iPhone. Pas encore vérifié sur un vrai iPhone (silencieux, musique).
 5. ~~Écran d'ouverture de 1,8 s~~ : réduit à 0,5 s le 3/11/2026.
 6. ~~Code compressé~~ : fait le 3/11/2026.
 7. ~~Temps d'arrêt affichés sur « Prêt »~~ : l'étape « Prêt » n'existe plus (3/11/2026).
@@ -113,7 +113,7 @@ Ajoutée le 3/11/2026. Hors ligne obligatoire (demande de Pierre).
 Pierre et Vincent travaillent tous les deux sur le dépôt, souvent avec Claude. Juste ces règles, rien de plus (pas de protection de branche, pas de vérification automatique : essayés puis retirés à la demande de Pierre) :
 - **Toujours `git pull` avant `git push`**, pour récupérer ce que l'autre a envoyé et ne rien écraser. En cas de conflit, le résoudre en gardant les deux travaux, et demander si on ne sait pas lequel garder.
 - **Jamais de `git push --force`**, jamais de réécriture de l'historique (pas de `reset` sur un commit déjà envoyé). Pour annuler une modif : `git revert`.
-- **Sauvegardes** : une étiquette sur GitHub à chaque version qui marche bien (`git tag -a v2 -m "…"` puis `git push origin v2`). `v1` = refonte du 5/11/2026 avec Vincent co-créateur. Pour revenir à une version : `git revert` des commits fautifs, ou repartir du contenu de l'étiquette (`git checkout v1 -- .` puis un nouveau commit), toujours sans effacer l'historique. Proposer une étiquette à Pierre quand une version est publiée et validée.
+- **Sauvegardes** : une étiquette sur GitHub à chaque version qui marche bien (`git tag -a v2 -m "…"` puis `git push origin v2`). `v1` = refonte du 5/11/2026 avec Vincent co-créateur. `v2` = 6/11/2026 : nom CHRONO CANNE, retour haptique, audits Ponytail et Impeccable (19/20), page fixe sur iPhone, textes réécrits, son en mode silencieux. Pour revenir à une version : `git revert` des commits fautifs, ou repartir du contenu de l'étiquette (`git checkout v1 -- .` puis un nouveau commit), toujours sans effacer l'historique. Proposer une étiquette à Pierre quand une version est publiée et validée.
 
 ## Publication
 
