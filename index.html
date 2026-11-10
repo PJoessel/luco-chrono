@@ -438,7 +438,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
       <ul>
         <li><b>Pas de son sur iPhone ?</b> Désactive le mode silencieux. Sur les iPhone récents, l’app sonne même en silencieux, mais pas sur les plus anciens.</li>
         <li>Monte le volume du téléphone.</li>
-        <li>Laisse l’app ouverte à l’écran pendant l’assaut. L’écran reste allumé tout seul, mais si tu verrouilles le téléphone ou que tu passes sur une autre app, les sons s’arrêtent.</li>
+        <li>Laisse l’app ouverte à l’écran pendant l’assaut. L’écran reste allumé tout seul.</li>
       </ul>
     </section>
     <section>
@@ -597,30 +597,129 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     return o;
   }
 
-  // Cloche : fondamentale + harmoniques qui s'éteignent plus vite.
+  // Cloche : fondamentale + harmoniques qui s'éteignent plus vite ([rapport de fréquence, volume])
+  const PARTIELS = [[1, 1], [2.76, .55], [5.4, .3], [8.93, .15]];
+  const ATTAQUE = .004;
+  const dureePartiel = (duree, i) => duree / (1 + i * .7);
+
   // `decalage` : nombre de secondes avant le coup
   function cloche(freq, duree, vol, decalage) {
     if (!ac) return;
     try {
       const t = ac.currentTime + (decalage || 0);
-      [[1, 1], [2.76, .55], [5.4, .3], [8.93, .15]].forEach(([r, v], i) => {
-        note(freq * r, "sine", vol * v, .004, duree / (1 + i * .7), ac.destination, t);
+      PARTIELS.forEach(([r, v], i) => {
+        note(freq * r, "sine", vol * v, ATTAQUE, dureePartiel(duree, i), ac.destination, t);
       });
     } catch (e) {}
   }
 
-  // 5 dernières secondes : un ding par seconde
-  const bip = () => cloche(1100, .8, .3);
+  // Les sons de l'assaut : [décalage en s, fréquence, durée, volume] pour chaque ding
+  const SONS = {
+    bip: [[0, 1100, .8, .3]],                                    // 3, 2, 1 et 5 dernières secondes : un par seconde
+    fin: [[0, 880, 1.6, .5], [.4, 880, 1.6, .5], [.8, 880, 1.6, .5]], // fin de reprise : trois dings graves
+    depart: [[0, 1500, 1, .35], [.18, 1500, 1.2, .35]],          // départ d'une reprise : deux dings aigus
+  };
 
-  // Fin de reprise : trois dings plus graves et plus forts
-  function sonnerieFin() {
-    [0, .4, .8].forEach((d) => cloche(880, 1.6, .5, d));
+  /* Piste de l'assaut : tous les sons du plan (voir Chrono), fabriqués d'avance dans un
+     fichier son, joué comme une musique. Le téléphone le laisse aller au bout même si on
+     change d'app ou si l'écran se verrouille, alors qu'il met la page (et Web Audio) en
+     veille. Si la piste ne peut pas démarrer, les sons passent par Web Audio, comme avant. */
+  const piste = new Audio();
+  const F = 16000; // échantillons par seconde : assez pour les dings (32 Ko par seconde de piste)
+  const TRANCHE = 20 * 60; // au plus 20 min de piste à la fois (38 Mo), voir tic()
+  let sansPiste = false;
+  let urlPiste = null;
+  let pisteDe = 0, pisteA = 0; // moment du plan où la piste commence et finit (en s)
+
+  // Piste des sons du plan à partir du moment `de` (en s)
+  function fabriquerPiste(de) {
+    const der = plan[plan.length - 1];
+    pisteDe = de;
+    pisteA = Math.min(der.debut + der.duree, de + TRANCHE);
+    const n = Math.ceil((pisteA - de + 3) * F); // + 3 s pour que les derniers dings s'éteignent
+    const ech = new Int16Array(n);
+
+    function ecrire(nom, t) {
+      if (t < de || t > pisteA) return; // hors de cette tranche
+      SONS[nom].forEach(([dec, freq, duree, vol]) => {
+        const k0 = Math.round((t - de + dec) * F);
+        PARTIELS.forEach(([r, v], i) => {
+          const f = freq * r, a = vol * v * 32767, d = dureePartiel(duree, i);
+          if (f >= F / 2) return; // trop aigu pour la piste
+          const kA = ATTAQUE * F, chute = Math.pow(.0001 * 32767 / a, 1 / ((d - ATTAQUE) * F));
+          let env = 0;
+          for (let k = 0; k < d * F && k0 + k < n; k++) {
+            env = k < kA ? a * k / kA : env * chute; // même enveloppe que note()
+            const s = ech[k0 + k] + env * Math.sin(2 * Math.PI * f * k / F);
+            ech[k0 + k] = s > 32767 ? 32767 : s < -32768 ? -32768 : s;
+          }
+        });
+      });
+    }
+
+    plan.forEach((e) => {
+      const fin = e.debut + e.duree;
+      for (let s = 1; s <= Math.min(5, Math.ceil(e.duree)); s++) ecrire("bip", Math.max(e.debut, fin - s));
+      ecrire(e.etat === "run" ? "fin" : "depart", fin);
+    });
+
+    // en-tête WAV : 16 bits, mono
+    const h = new DataView(new ArrayBuffer(44));
+    const txt = (o, s) => [...s].forEach((c, i) => h.setUint8(o + i, c.charCodeAt(0)));
+    txt(0, "RIFF"); h.setUint32(4, 36 + n * 2, true); txt(8, "WAVE");
+    txt(12, "fmt "); h.setUint32(16, 16, true); h.setUint16(20, 1, true); h.setUint16(22, 1, true);
+    h.setUint32(24, F, true); h.setUint32(28, F * 2, true); h.setUint16(32, 2, true); h.setUint16(34, 16, true);
+    txt(36, "data"); h.setUint32(40, n * 2, true);
+    if (urlPiste) URL.revokeObjectURL(urlPiste);
+    urlPiste = URL.createObjectURL(new Blob([h, ech], { type: "audio/wav" }));
   }
 
-  // Départ automatique après le repos : deux dings aigus
-  function depart() {
-    cloche(1500, 1, .35);
-    cloche(1500, 1.2, .35, .18);
+  function jouerPiste() {
+    piste.play().catch((err) => {
+      if (err.name === "AbortError") return;
+      sansPiste = true;
+      piste.pause();
+      derniereSec = null; // le refus arrive un instant après : on rejoue le ding de la seconde en cours
+    });
+  }
+
+  // La piste a été refusée (par exemple relancée app en arrière-plan, après un appel) :
+  // on en refait une à partir de maintenant, dès que l'app revient à l'écran
+  function relancerPiste() {
+    if (!sansPiste || !plan.length) return;
+    sansPiste = false;
+    changerPiste(Math.max(0, (Date.now() - t0) / 1000));
+  }
+
+  // Sans piste seulement : le son passe par Web Audio, au moment voulu
+  function sonDirect(nom) {
+    if (sansPiste) SONS[nom].forEach(([dec, freq, duree, vol]) => cloche(freq, duree, vol, dec));
+  }
+
+  // L'écran se cale sur la piste dès qu'elle joue vraiment (le démarrage peut prendre un instant)
+  piste.addEventListener("playing", () => {
+    if (etat !== "paused" && etat !== "setup") t0 = Date.now() - (pisteDe + piste.currentTime) * 1000;
+  });
+
+  // Piste coupée de l'extérieur (appel, autre app qui joue un son) : l'assaut se met en pause
+  piste.addEventListener("pause", () => {
+    if (piste.ended || sansPiste) return;
+    if (etat === "run") mettreEnPause();
+    else if (etat === "repos" || etat === "decompte") jouerPiste(); // pas de pause possible : on relance
+  });
+
+  // Écran verrouillé : la piste s'y affiche comme une musique. Ses boutons pause / lecture
+  // font comme le gros bouton jaune ; on ne peut pas avancer ni reculer dans la piste.
+  if ("mediaSession" in navigator) {
+    try {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: "CHRONO CANNE", artist: "Les Cannes du Luco",
+        artwork: [{ src: "icons/icon-512.png", sizes: "512x512", type: "image/png" }],
+      });
+      navigator.mediaSession.setActionHandler("pause", () => { if (etat === "run") mettreEnPause(); });
+      navigator.mediaSession.setActionHandler("play", () => { if (etat === "paused") reprendre(); });
+      navigator.mediaSession.setActionHandler("seekto", () => {});
+    } catch (e) {}
   }
 
   // Retour haptique : une très brève vibration à chaque appui sur un bouton, comme le
@@ -701,24 +800,27 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     if (document.visibilityState !== "visible") return;
     if (ac && ac.state !== "running") ac.resume().catch(() => {});
     if (etat !== "setup" && etat !== "done") garderAllume();
+    if (etat === "run" || etat === "repos" || etat === "decompte") relancerPiste();
   });
 
   /* ---------- Chrono ----------
-     États : setup (réglages), run (combat), paused, repos (repos chronométré),
+     États : setup (réglages), decompte (3, 2, 1), run (combat), paused, repos,
      between (reprise finie, sans repos réglé), done (assaut fini).
-     L'état est recopié dans #run[data-etat] : le CSS en tire les couleurs. */
+     L'état est recopié dans #run[data-etat] : le CSS en tire les couleurs.
+
+     Chaque départ lancé à la main prépare le « plan » de tout ce qui suit jusqu'au
+     prochain appui : décompte, reprise, repos, reprise… L'écran suit ce plan à l'heure
+     près (Date.now, pas de dérive), et tous ses sons sont fabriqués d'avance dans une
+     piste audio (voir plus bas). */
 
   let etat = "setup";
   let reprise = 1;
-  let resteMs = 0;     // temps restant au moment de la pause
-  let finA = 0;        // heure de fin de la reprise ou du repos (Date.now) : pas de dérive
-  let dureeEnCours = 0; // durée de ce qui tourne (reprise ou repos), en secondes
+  let plan = [];      // étapes { etat, reprise, debut, duree }, en secondes depuis le départ du plan
+  let iPlan = -1;     // étape affichée
+  let t0 = 0;         // heure du départ du plan (Date.now), décalée de la durée des pauses
+  let pauseA = 0;     // heure de la mise en pause
   let derniereSec = null;
   let minuteur = null;
-
-  // Début de ce qui suit : pile à la fin de ce qui vient de finir, sauf si l'app
-  // était en veille (plus de 2 s de retard) : on repart de maintenant, sans rattrapage
-  const suite = () => (Date.now() - finA < 2000 ? finA : Date.now());
 
   function changerEtat(e) {
     etat = e;
@@ -805,64 +907,29 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     b.disabled = false;
   }
 
-  function demarrerReprise(debut = Date.now()) {
-    changerEtat("run");
-    resteMs = S.d * 1000;
-    derniereSec = null;
-    dureeEnCours = S.d;
-    $("msg").textContent = "";
-    $("sous").textContent = "";
-    boutonJaune("Pause");
-    barre(0);
-    finA = debut + resteMs;
+  // Prépare le plan depuis la reprise `reprise` : décompte, puis reprises et repos
+  // jusqu'à la fin de l'assaut, ou jusqu'à la fin de la reprise s'il n'y a pas de repos
+  function lancerPlan() {
+    plan = [{ etat: "decompte", reprise, debut: 0, duree: 3 }];
+    let t = 3;
+    for (let k = reprise; ; k++) {
+      plan.push({ etat: "run", reprise: k, debut: t, duree: S.d });
+      t += S.d;
+      if (k >= S.n || !S.r) break;
+      plan.push({ etat: "repos", reprise: k, debut: t, duree: S.r });
+      t += S.r;
+    }
+    sansPiste = false;
+    changerPiste(0);
+    t0 = Date.now();
+    iPlan = -1;
     lancerMinuteur();
   }
 
-  function demarrerRepos() {
-    changerEtat("repos");
-    derniereSec = null;
-    dureeEnCours = S.r;
-    $("msg").textContent = "Repos";
-    $("sous").textContent = "";
-    boutonJaune("Lancer", "appui long");
-    barre(0);
-    finA = suite() + S.r * 1000;
-    lancerMinuteur();
-  }
-
-  function finirRepos() {
-    clearInterval(minuteur);
-    reprise++;
-    lancerReprise(suite());
-  }
-
-  // Fin du repos : la reprise suivante part toute seule, avec les deux dings de départ
-  function lancerReprise(debut) {
-    depart();
-    vibrer(300);
-    glisser(() => demarrerReprise(debut));
-  }
-
-  // Départ lancé à la main (« Lancer », « Lancer la 2e », appui long) : 3, 2, 1 à l'écran
-  // avec un ding à chaque chiffre, puis la reprise part avec les deux dings de départ
-  function demarrerDecompte() {
-    changerEtat("decompte");
-    derniereSec = null;
-    dureeEnCours = 3;
-    $("msg").textContent = "Départ dans";
-    $("sous").textContent = "";
-    boutonJaune("Pause");
-    $("bPause").disabled = true; // pas de pause pendant les 3 secondes
-    barre(0);
-    finA = Date.now() + 3000;
-    lancerMinuteur();
-  }
-
-  function finirDecompte() {
-    clearInterval(minuteur);
-    depart();
-    vibrer(300);
-    demarrerReprise(suite());
+  function changerPiste(de) {
+    fabriquerPiste(de);
+    piste.src = urlPiste;
+    jouerPiste();
   }
 
   function lancerMinuteur() {
@@ -872,41 +939,71 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
   }
 
   function tic() {
-    const reste = finA - Date.now();
-    if (reste <= 0) {
-      if (etat === "repos") finirRepos();
-      else if (etat === "decompte") finirDecompte();
-      else finirReprise();
-      return;
-    }
-    const sec = Math.ceil(reste / 1000);
+    const t = (Date.now() - t0) / 1000;
+    let i = Math.max(0, iPlan);
+    while (i < plan.length && t >= plan[i].debut + plan[i].duree) i++;
+    if (i !== iPlan) entrer(i);
+    if (i >= plan.length) return;
+    const e = plan[i], reste = e.debut + e.duree - t, sec = Math.ceil(reste);
+    // assaut de plus de 20 min : la tranche suivante de la piste est préparée 5 min avant la
+    // fin de celle-ci, app à l'écran, pendant un silence (aucun ding en train de sonner ni proche)
+    if (!sansPiste && etat !== "paused" && t > pisteA - TRANCHE / 4 && pisteA < plan[plan.length - 1].debut + plan[plan.length - 1].duree &&
+        t - e.debut > 2.5 && reste > 6 && document.visibilityState === "visible") changerPiste(t);
     if (sec !== derniereSec) {
       derniereSec = sec;
-      if (sec <= 5) bip();
+      if (sec <= 5) sonDirect("bip");
       if (etat === "decompte") chiffres(String(sec));
       else chiffres(fmt(sec), sec <= 5 ? "alerte" : "");
     }
-    barre(1 - reste / (dureeEnCours * 1000));
+    barre(1 - reste / e.duree);
   }
 
-  function finirReprise() {
+  // Passage à l'étape i du plan (i = plan.length : le plan est fini)
+  function entrer(i) {
+    const prec = plan[i - 1], e = plan[i];
+    // retour dans l'app après plusieurs étapes passées en veille : ni son, ni animation
+    const bond = i > iPlan + 1;
+    iPlan = i;
+    derniereSec = null;
+    if (prec && !bond) {
+      if (prec.etat === "run") {
+        sonDirect("fin");
+        vibrer([400, 150, 400]);
+        barre(1);
+        chiffres("0:00");
+      } else {
+        sonDirect("depart");
+        vibrer(300);
+      }
+    }
+    reprise = (e || prec).reprise;
+    const fini = !e && reprise >= S.n;
+    // animation : fin de reprise vers repos ou fin d'assaut, fin du repos vers reprise
+    const anime = prec && !bond && prec.etat !== "decompte" && (e || fini);
+    (anime ? glisser : (f) => f())(() => (e ? afficherEtape(e) : finirPlan(fini)));
+  }
+
+  function afficherEtape(e) {
+    changerEtat(e.etat);
+    $("msg").textContent = { decompte: "Départ dans", run: "", repos: "Repos" }[e.etat];
+    $("sous").textContent = "";
+    if (e.etat === "repos") boutonJaune("Lancer", "appui long");
+    else boutonJaune("Pause");
+    $("bPause").disabled = e.etat === "decompte"; // pas de pause pendant le 3, 2, 1
+    barre(0);
+  }
+
+  function finirPlan(fini) {
     clearInterval(minuteur);
-    sonnerieFin();
-    vibrer([400, 150, 400]);
     barre(1);
     chiffres("0:00");
-
-    if (reprise >= S.n) {
+    if (fini) {
       fermerConf(); // plus rien à arrêter
-      glisser(() => {
-        changerEtat("done");
-        $("msg").textContent = "Terminé";
-        $("sous").textContent = recap();
-        boutonJaune("Retour aux réglages");
-      });
+      changerEtat("done");
+      $("msg").textContent = "Terminé";
+      $("sous").textContent = recap();
+      boutonJaune("Retour aux réglages");
       laisserEteindre();
-    } else if (S.r) {
-      glisser(demarrerRepos);
     } else {
       changerEtat("between");
       $("msg").textContent = "Fin";
@@ -917,8 +1014,15 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
 
   function retourReglages() {
     clearInterval(minuteur);
+    // la piste (15 à 38 Mo) est libérée
+    piste.pause();
+    piste.removeAttribute("src");
+    piste.load();
+    if (urlPiste) URL.revokeObjectURL(urlPiste);
+    urlPiste = null;
+    plan = [];
+    iPlan = -1;
     reprise = 1;
-    resteMs = 0;
     derniereSec = null;
     $("sous").textContent = "";
     $("msg").textContent = "";
@@ -929,18 +1033,21 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
   }
 
   function mettreEnPause() {
-    resteMs = finA - Date.now();
+    pauseA = Date.now();
     clearInterval(minuteur);
+    piste.pause();
     changerEtat("paused");
     boutonJaune("Reprendre");
     $("msg").textContent = "Pause";
   }
 
   function reprendre() {
+    t0 += Date.now() - pauseA;
     changerEtat("run");
     $("msg").textContent = "";
     boutonJaune("Pause");
-    finA = Date.now() + resteMs;
+    if (sansPiste) relancerPiste();
+    else jouerPiste();
     lancerMinuteur();
   }
 
@@ -951,7 +1058,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     $("segs").innerHTML = "<i></i>".repeat(S.n);
     montrer("run");
     garderAllume();
-    demarrerDecompte();
+    lancerPlan();
   });
 
   // Pendant le repos, il faut garder le doigt 1 s sur « Lancer » : pas de départ par erreur
@@ -967,7 +1074,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
       if (etat !== "repos") return; // le repos a fini tout seul : la reprise est déjà lancée
       clearInterval(minuteur);
       reprise++;
-      glisser(demarrerDecompte);
+      glisser(lancerPlan);
     }, 1000);
   }
 
@@ -990,7 +1097,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     else if (etat === "paused") reprendre();
     else if (etat === "between") {
       reprise++;
-      glisser(demarrerDecompte);
+      glisser(lancerPlan);
     }
     else if (etat === "done") retourReglages();
     // repos : un simple appui ne fait rien, voir l'appui long
