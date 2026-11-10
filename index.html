@@ -312,6 +312,8 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(
   overflow: hidden;
   background: var(--jaune);
   color: var(--noir);
+  /* même bord qu'« Arrêter » (invisible) : sinon le bord de 3 px rend Arrêter plus large */
+  border: 3px solid transparent;
   -webkit-touch-callout: none;
   touch-action: none;
 }
@@ -326,7 +328,11 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(
   transform-origin: left;
 }
 #bPause.appui::before { transform: scaleX(1); transition: transform 1s linear; }
-#bStop { flex: .62; border: 3px solid var(--rouge); color: var(--rouge); }
+#bStop { flex: 1; border: 3px solid var(--rouge); color: var(--rouge); }
+/* « Lancer la 2e » a besoin de place : là seulement, Arrêter est plus étroit */
+#run[data-etat="between"] #bStop { flex: .62; }
+/* décompte 3, 2, 1 : pas de pause possible */
+#bPause:disabled { opacity: .3; cursor: default; }
 #bStop:active { background: var(--rouge); color: var(--blanc); }
 /* assaut fini : plus rien à arrêter */
 #run[data-etat="done"] #bStop { display: none; }
@@ -401,9 +407,9 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
       <button class="step" data-k="d" data-d="30" aria-label="Allonger la reprise de 30 secondes"></button>
     </div>
     <div class="carte reglage">
-      <button class="step" data-k="r" data-d="-30" aria-label="Raccourcir le repos de 30 secondes"></button>
+      <button class="step" data-k="r" data-d="-30" aria-label="Raccourcir le repos"></button>
       <div class="milieu"><span class="lib">Repos entre les reprises</span><div class="v" id="vR">1:00</div></div>
-      <button class="step" data-k="r" data-d="30" aria-label="Allonger le repos de 30 secondes"></button>
+      <button class="step" data-k="r" data-d="30" aria-label="Allonger le repos"></button>
     </div>
   </div>
   <button class="go" id="bGo">Lancer</button>
@@ -420,6 +426,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
       <h3>Comment ça marche</h3>
       <ul>
         <li>Choisis le nombre de reprises, leur durée et le temps de repos entre deux reprises, puis appuie sur <b>Lancer</b>. L’app garde tes réglages pour la prochaine fois.</li>
+        <li>Quand tu lances une reprise, un décompte 3, 2, 1 s’affiche, avec un ding à chaque chiffre.</li>
         <li>Pendant une reprise, un ding sonne chaque seconde sur les 5 dernières secondes. À la fin de la reprise, trois dings.</li>
         <li>Le repos démarre tout seul. À la fin du repos, deux dings aigus, et la reprise suivante démarre toute seule.</li>
         <li>Pour lancer la reprise suivante avant la fin du repos, garde le doigt appuyé 1 seconde sur <b>Lancer</b>.</li>
@@ -509,6 +516,8 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
   // n = nombre de reprises, d = durée d'une reprise, r = repos entre deux reprises
   // (en secondes ; r = 0 : pas de repos, on enchaîne à la main)
   const S = { n: 3, d: 120, r: 60 };
+  // repos possibles : 10 et 15 s pour un simple changement de tireur, puis de 30 s en 30 s
+  const REPOS = [0, 10, 15, 30, 60, 90, 120, 150, 180];
 
   try {
     const o = JSON.parse(localStorage.getItem(CLE));
@@ -525,7 +534,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
   function borner() {
     S.n = Math.min(20, Math.max(1, S.n));
     if (S.d !== TEST) S.d = Math.min(180, Math.max(30, Math.round(S.d / 30) * 30));
-    S.r = Math.min(180, Math.max(0, Math.round(S.r / 30) * 30));
+    S.r = REPOS.reduce((a, b) => (Math.abs(b - S.r) < Math.abs(a - S.r) ? b : a)); // la valeur permise la plus proche
   }
 
   function afficherReglages() {
@@ -547,7 +556,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
       if (b.dataset.k === "n") {
         S.n += delta;
       } else if (b.dataset.k === "r") {
-        S.r += delta;
+        S.r = REPOS[Math.min(REPOS.length - 1, Math.max(0, REPOS.indexOf(S.r) + Math.sign(delta)))];
       } else if (delta < 0) {
         S.d = S.d <= 30 ? TEST : S.d - 30;
       } else {
@@ -730,7 +739,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
       $("hD").textContent = "sur " + S.n;
     }
     // 2. segments : faites, en cours, à venir
-    const enCours = etat === "run" || etat === "paused";
+    const enCours = etat === "run" || etat === "paused" || etat === "decompte";
     const faites = enCours ? reprise - 1 : etat === "done" ? S.n : reprise;
     [...$("segs").children].forEach((seg, i) => {
       seg.className = i < faites ? "fait" : enCours && i === faites ? "cours" : "";
@@ -793,6 +802,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     b.innerHTML = '<span class="lig' + (etat === "between" && texte.length > 12 ? " serre" : "") + '">' + texte + "</span>" +
       (petit ? "<small>" + petit + "</small>" : "");
     b.classList.remove("appui");
+    b.disabled = false;
   }
 
   function demarrerReprise(debut = Date.now()) {
@@ -826,12 +836,33 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     lancerReprise(suite());
   }
 
-  // Reprise suivante lancée (fin du repos, appui long, « Lancer la 2e ») :
-  // toujours les deux dings de départ, pour les tireurs qui ne regardent pas
+  // Fin du repos : la reprise suivante part toute seule, avec les deux dings de départ
   function lancerReprise(debut) {
     depart();
     vibrer(300);
     glisser(() => demarrerReprise(debut));
+  }
+
+  // Départ lancé à la main (« Lancer », « Lancer la 2e », appui long) : 3, 2, 1 à l'écran
+  // avec un ding à chaque chiffre, puis la reprise part avec les deux dings de départ
+  function demarrerDecompte() {
+    changerEtat("decompte");
+    derniereSec = null;
+    dureeEnCours = 3;
+    $("msg").textContent = "Départ dans";
+    $("sous").textContent = "";
+    boutonJaune("Pause");
+    $("bPause").disabled = true; // pas de pause pendant les 3 secondes
+    barre(0);
+    finA = Date.now() + 3000;
+    lancerMinuteur();
+  }
+
+  function finirDecompte() {
+    clearInterval(minuteur);
+    depart();
+    vibrer(300);
+    demarrerReprise(suite());
   }
 
   function lancerMinuteur() {
@@ -844,6 +875,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     const reste = finA - Date.now();
     if (reste <= 0) {
       if (etat === "repos") finirRepos();
+      else if (etat === "decompte") finirDecompte();
       else finirReprise();
       return;
     }
@@ -851,7 +883,8 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     if (sec !== derniereSec) {
       derniereSec = sec;
       if (sec <= 5) bip();
-      chiffres(fmt(sec), sec <= 5 ? "alerte" : "");
+      if (etat === "decompte") chiffres(String(sec));
+      else chiffres(fmt(sec), sec <= 5 ? "alerte" : "");
     }
     barre(1 - reste / (dureeEnCours * 1000));
   }
@@ -869,7 +902,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
         changerEtat("done");
         $("msg").textContent = "Terminé";
         $("sous").textContent = recap();
-        boutonJaune("Nouvel assaut");
+        boutonJaune("Retour aux réglages");
       });
       laisserEteindre();
     } else if (S.r) {
@@ -918,7 +951,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     $("segs").innerHTML = "<i></i>".repeat(S.n);
     montrer("run");
     garderAllume();
-    demarrerReprise();
+    demarrerDecompte();
   });
 
   // Pendant le repos, il faut garder le doigt 1 s sur « Lancer » : pas de départ par erreur
@@ -934,7 +967,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
       if (etat !== "repos") return; // le repos a fini tout seul : la reprise est déjà lancée
       clearInterval(minuteur);
       reprise++;
-      lancerReprise();
+      glisser(demarrerDecompte);
     }, 1000);
   }
 
@@ -957,7 +990,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     else if (etat === "paused") reprendre();
     else if (etat === "between") {
       reprise++;
-      lancerReprise();
+      glisser(demarrerDecompte);
     }
     else if (etat === "done") retourReglages();
     // repos : un simple appui ne fait rien, voir l'appui long

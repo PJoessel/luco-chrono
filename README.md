@@ -6,8 +6,8 @@ Chrono de reprises pour la **canne de combat**, créé par **Pierre Joëssel et 
 
 ## Ce que fait l'app
 
-- **Réglages** : nombre de reprises, durée d'une reprise, repos entre les reprises (ou pas de repos). Ils sont gardés d'une fois sur l'autre.
-- **Des dings** : un par seconde sur les 5 dernières secondes, trois à la fin de la reprise, deux aigus au départ de la suivante.
+- **Réglages** : nombre de reprises, durée d'une reprise, repos entre les reprises (pas de repos, 10 s ou 15 s pour un changement de tireur, puis de 30 s à 3 min). Ils sont gardés d'une fois sur l'autre.
+- **Des dings** : trois au décompte 3, 2, 1 du départ, un par seconde sur les 5 dernières secondes, trois à la fin de la reprise, deux aigus au départ de la suivante.
 - **Repos automatique**, puis reprise suivante. Pour repartir plus tôt : garder le doigt 1 seconde sur « Lancer ».
 - **Marche sans réseau** : une fois installée, l'app marche aussi en mode avion.
 
