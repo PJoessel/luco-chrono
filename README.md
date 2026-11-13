@@ -9,7 +9,7 @@ Chrono de reprises pour la **canne de combat**, créé par **Pierre Joëssel et 
 - **Réglages** : nombre de reprises, durée d'une reprise, repos entre les reprises (pas de repos, 10 s ou 15 s pour un changement de tireur, puis de 30 s à 3 min). Ils sont gardés d'une fois sur l'autre.
 - **Des dings** : trois au décompte 3, 2, 1 du départ, un par seconde sur les 5 dernières secondes, trois à la fin de la reprise, deux aigus au départ de la suivante.
 - **Repos automatique**, puis reprise suivante. Pour repartir plus tôt : garder le doigt 1 seconde sur « Lancer ».
-- **Avec un arbitre** : on peut couper le décompte 3, 2, 1 (la reprise part dès qu'on appuie) et la reprise auto après le repos (l'app attend qu'on lance la suivante).
+- **Avec un arbitre** : sous le repos, deux interrupteurs. « 3, 2, 1 au lancement de l'assaut » coupé, la reprise part dès qu'on appuie. « Lancement automatique de la reprise après le repos » coupé, l'app attend qu'on lance la suivante.
 - **Les dings continuent** si on passe sur une autre app ou que le téléphone se verrouille.
 - **Marche sans réseau** : une fois installée, l'app marche aussi en mode avion.
 

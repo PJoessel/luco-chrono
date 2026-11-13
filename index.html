@@ -192,12 +192,14 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(
 .step:disabled { opacity: .3; cursor: default; }
 /* Options sous le repos : interrupteurs (jaune = activé). Utiles avec un arbitre qui dirige l'assaut */
 .options { padding: 2px clamp(12px, 4cqw, 20px); }
-.opt { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; min-height: 60px; padding-block: 8px; text-align: left; font-size: clamp(17px, 5.4cqw, 23px); line-height: 1.15; text-wrap: balance; }
+.opt { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; min-height: 60px; padding-block: 8px; text-align: left; font-size: clamp(17px, 5.4cqw, 23px); line-height: 1.15; text-wrap: balance; transition: background .15s; }
 .opt + .opt { border-top: 1px solid rgba(255, 255, 255, .08); }
 .inter { flex: none; position: relative; width: 62px; height: 36px; border-radius: 999px; background: var(--gris); transition: background .2s; }
 .inter::after { content: ""; position: absolute; top: 3px; left: 3px; width: 30px; height: 30px; border-radius: 50%; background: var(--gris-clair); transition: transform .2s, background .2s; }
 .opt[aria-checked="true"] .inter { background: var(--jaune); }
 .opt[aria-checked="true"] .inter::after { transform: translateX(26px); background: var(--noir); }
+/* appui : la ligne s'éclaircit un instant, comme les + et − qui passent au jaune */
+.opt:not(:disabled):active { background: color-mix(in srgb, var(--blanc) 7%, transparent); }
 /* repos sur « Non » : rien ne s'enchaîne tout seul, l'option ne sert à rien */
 .opt:disabled { opacity: .3; cursor: default; }
 .go {
@@ -343,7 +345,8 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(
 /* « Lancer la 2e » a besoin de place : là seulement, Arrêter est plus étroit */
 #run[data-etat="between"] #bStop { flex: .62; }
 /* décompte 3, 2, 1 : pas de pause possible */
-#bPause:disabled { opacity: .3; cursor: default; }
+/* grisé pendant le 3, 2, 1 : un vrai gris (le jaune reste aux boutons qu'on peut toucher) */
+#bPause:disabled { background: var(--gris); color: var(--gris-clair); cursor: default; }
 #bStop:active { background: var(--rouge); color: var(--blanc); }
 /* assaut fini : plus rien à arrêter */
 #run[data-etat="done"] #bStop { display: none; }
@@ -441,12 +444,19 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
       <h3>Comment ça marche</h3>
       <ul>
         <li>Choisis le nombre de reprises, leur durée et le temps de repos entre deux reprises, puis appuie sur <b>Lancer</b>. L’app garde tes réglages pour la prochaine fois.</li>
-        <li>Quand tu lances une reprise, un décompte 3, 2, 1 s’affiche, avec un ding à chaque chiffre (option <b>3, 2, 1 au lancement de l’assaut</b>).</li>
+        <li>Quand tu lances une reprise, un décompte 3, 2, 1 s’affiche, avec un ding à chaque chiffre.</li>
         <li>Pendant une reprise, un ding sonne chaque seconde sur les 5 dernières secondes. À la fin de la reprise, trois dings.</li>
-        <li>Le repos démarre tout seul. À la fin du repos, deux dings aigus, et la reprise suivante démarre toute seule (option <b>Lancement automatique de la reprise après le repos</b>).</li>
+        <li>Le repos démarre tout seul. À la fin du repos, deux dings aigus, et la reprise suivante démarre toute seule.</li>
         <li>Pour lancer la reprise suivante avant la fin du repos, garde le doigt appuyé 1 seconde sur <b>Lancer</b>.</li>
-        <li>Avec un arbitre, tu peux couper le <b>3, 2, 1</b> et le <b>lancement automatique de la reprise après le repos</b>. La reprise part alors dès que tu appuies sur <b>Lancer</b>, et à la fin du repos l’app attend que tu lances la suivante.</li>
         <li><b>Pause</b> arrête le temps pendant une reprise. <b>Arrêter</b> met fin à l’assaut, après une confirmation.</li>
+      </ul>
+    </section>
+    <section>
+      <h3>Avec un arbitre</h3>
+      <p>Quand un arbitre dirige l’assaut, il donne lui-même le départ. Sous le repos, deux interrupteurs permettent de suivre ses commandements :</p>
+      <ul>
+        <li><b>3, 2, 1 au lancement de l’assaut</b> : coupé, la reprise part dès que tu appuies sur <b>Lancer</b>.</li>
+        <li><b>Lancement automatique de la reprise après le repos</b> : coupé, à la fin du repos l’app affiche « Repos fini » et attend que tu lances la suivante.</li>
       </ul>
     </section>
     <section class="important">
@@ -880,7 +890,8 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     });
     // 4. carte « Ensuite » : ce qui vient, sa durée, la couleur de l'état qui arrive
     let quoi = ordinal(reprise + 1) + " reprise", duree = fmt(S.d), suite = "run";
-    if (enCours) {
+    if (etat === "decompte") { quoi = ordinal(reprise) + " reprise"; } // après le 3, 2, 1 vient la reprise elle-même
+    else if (enCours) {
       if (reprise >= S.n) { quoi = "Fin de l’assaut"; duree = ""; suite = "fin"; }
       else if (S.r) { quoi = "Repos"; duree = fmt(S.r); suite = "repos"; }
     }
