@@ -157,7 +157,8 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(
 /* trois cartes, centrées entre le titre et « Lancer » */
 .rows { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: clamp(10px, 2.2cqh, 18px); }
 /* les cartes grandissent avec la hauteur de l'écran (pas de grand vide au-dessus et en dessous) */
-.reglage { display: flex; align-items: center; gap: 8px; padding: clamp(10px, 3.4cqh, 34px) clamp(12px, 4cqw, 20px); }
+/* marge intérieure réduite sur les écrans bas (320 × 568, iPhone SE), pour laisser la place aux options */
+.reglage { display: flex; align-items: center; gap: 8px; padding: clamp(6px, 4.6cqh - 12px, 34px) clamp(12px, 4cqw, 20px); }
 .milieu { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .lib { font-size: clamp(16px, 5cqw, 22px); line-height: 1.15; color: var(--gris-clair); white-space: nowrap; }
 .v { font-family: var(--display); font-weight: 400; font-size: clamp(44px, min(17cqw, 9cqh), 84px); line-height: 1.05; white-space: nowrap; }
@@ -189,6 +190,16 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(
 .step[data-d^="-"]::after { display: none; }
 /* limite atteinte (1 ou 20 reprises, 3:00…) : le bouton s'efface, l'appui ne fait rien */
 .step:disabled { opacity: .3; cursor: default; }
+/* Options sous le repos : interrupteurs (jaune = activé). Utiles avec un arbitre qui dirige l'assaut */
+.options { padding: 2px clamp(12px, 4cqw, 20px); }
+.opt { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 44px; text-align: left; font-size: clamp(16px, 5cqw, 22px); line-height: 1.15; }
+.opt + .opt { border-top: 1px solid rgba(255, 255, 255, .08); }
+.inter { flex: none; position: relative; width: 50px; height: 30px; border-radius: 999px; background: var(--gris); transition: background .2s; }
+.inter::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: var(--gris-clair); transition: transform .2s, background .2s; }
+.opt[aria-checked="true"] .inter { background: var(--jaune); }
+.opt[aria-checked="true"] .inter::after { transform: translateX(20px); background: var(--noir); }
+/* repos sur « Non » : rien ne s'enchaîne tout seul, l'option ne sert à rien */
+.opt:disabled { opacity: .3; cursor: default; }
 .go {
   margin-top: clamp(10px, 2cqh, 18px);
   display: flex;
@@ -411,6 +422,10 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
       <div class="milieu"><span class="lib">Repos entre les reprises</span><div class="v" id="vR">1:00</div></div>
       <button class="step" data-k="r" data-d="30" aria-label="Allonger le repos"></button>
     </div>
+    <div class="carte options">
+      <button class="opt" id="oC" role="switch" aria-checked="true"><span>Décompte 3, 2, 1 au départ</span><i class="inter"></i></button>
+      <button class="opt" id="oA" role="switch" aria-checked="true"><span>Reprise auto après le repos</span><i class="inter"></i></button>
+    </div>
   </div>
   <button class="go" id="bGo">Lancer</button>
 </section>
@@ -430,6 +445,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
         <li>Pendant une reprise, un ding sonne chaque seconde sur les 5 dernières secondes. À la fin de la reprise, trois dings.</li>
         <li>Le repos démarre tout seul. À la fin du repos, deux dings aigus, et la reprise suivante démarre toute seule.</li>
         <li>Pour lancer la reprise suivante avant la fin du repos, garde le doigt appuyé 1 seconde sur <b>Lancer</b>.</li>
+        <li>Avec un arbitre, tu peux couper le <b>décompte 3, 2, 1</b> et la <b>reprise auto après le repos</b>. La reprise part alors dès que tu appuies sur <b>Lancer</b>, et à la fin du repos l’app attend que tu lances la suivante.</li>
         <li><b>Pause</b> arrête le temps pendant une reprise. <b>Arrêter</b> met fin à l’assaut, après une confirmation.</li>
       </ul>
     </section>
@@ -515,7 +531,9 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
   const TEST = 10; // durée de test : on y arrive en baissant sous 30 s, jamais sauvée
   // n = nombre de reprises, d = durée d'une reprise, r = repos entre deux reprises
   // (en secondes ; r = 0 : pas de repos, on enchaîne à la main)
-  const S = { n: 3, d: 120, r: 60 };
+  // c = décompte 3, 2, 1 avant chaque départ lancé à la main, a = reprise auto à la fin du repos
+  // (les deux coupés quand un arbitre dirige : la reprise part dès qu'on appuie, et on attend son signal)
+  const S = { n: 3, d: 120, r: 60, c: true, a: true };
   // repos possibles : 10 et 15 s pour un simple changement de tireur, puis de 30 s en 30 s
   const REPOS = [0, 10, 15, 30, 60, 90, 120, 150, 180];
 
@@ -525,6 +543,8 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
       S.n = +o.n || S.n;
       S.d = +o.d || S.d;
       if (Number.isFinite(+o.r)) S.r = +o.r;
+      if (typeof o.c === "boolean") S.c = o.c;
+      if (typeof o.a === "boolean") S.a = o.a;
     }
   } catch (e) {}
 
@@ -545,6 +565,9 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     // + et − grisés à la limite (le − de la durée descend jusqu'au mode test)
     const lim = { n: [1, 20], d: [TEST, 180], r: [0, 180] };
     document.querySelectorAll(".step").forEach((b) => { b.disabled = S[b.dataset.k] === lim[b.dataset.k][b.dataset.d < 0 ? 0 : 1]; });
+    $("oC").setAttribute("aria-checked", S.c);
+    $("oA").setAttribute("aria-checked", S.a);
+    $("oA").disabled = !S.r;
     try {
       if (S.d !== TEST) localStorage.setItem(CLE, JSON.stringify(S));
     } catch (e) {}
@@ -565,6 +588,9 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
       afficherReglages();
     });
   });
+
+  $("oC").addEventListener("click", () => { S.c = !S.c; afficherReglages(); });
+  $("oA").addEventListener("click", () => { S.a = !S.a; afficherReglages(); });
 
   /* ---------- Sons (fabriqués en Web Audio, aucun fichier) ---------- */
 
@@ -657,10 +683,12 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
       });
     }
 
+    if (plan[0].etat === "run") ecrire("depart", 0); // sans décompte : la reprise part tout de suite
     plan.forEach((e) => {
       const fin = e.debut + e.duree;
       for (let s = 1; s <= Math.min(5, Math.ceil(e.duree)); s++) ecrire("bip", Math.max(e.debut, fin - s));
-      ecrire(e.etat === "run" ? "fin" : "depart", fin);
+      if (e.etat === "run") ecrire("fin", fin);
+      else if (e !== der) ecrire("depart", fin); // repos en fin de plan (pas de reprise auto) : on attend l'appui
     });
 
     // en-tête WAV : 16 bits, mono
@@ -805,7 +833,8 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
 
   /* ---------- Chrono ----------
      États : setup (réglages), decompte (3, 2, 1), run (combat), paused, repos,
-     between (reprise finie, sans repos réglé), done (assaut fini).
+     between (attente d'un appui : reprise finie sans repos, ou repos fini sans reprise auto),
+     done (assaut fini).
      L'état est recopié dans #run[data-etat] : le CSS en tire les couleurs.
 
      Chaque départ lancé à la main prépare le « plan » de tout ce qui suit jusqu'au
@@ -907,17 +936,18 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     b.disabled = false;
   }
 
-  // Prépare le plan depuis la reprise `reprise` : décompte, puis reprises et repos
-  // jusqu'à la fin de l'assaut, ou jusqu'à la fin de la reprise s'il n'y a pas de repos
+  // Prépare le plan depuis la reprise `reprise` : décompte (si activé), puis reprises et repos
+  // jusqu'à la fin de l'assaut, ou jusqu'au prochain appui (pas de repos, ou pas de reprise auto)
   function lancerPlan() {
-    plan = [{ etat: "decompte", reprise, debut: 0, duree: 3 }];
-    let t = 3;
+    plan = S.c ? [{ etat: "decompte", reprise, debut: 0, duree: 3 }] : [];
+    let t = S.c ? 3 : 0;
     for (let k = reprise; ; k++) {
       plan.push({ etat: "run", reprise: k, debut: t, duree: S.d });
       t += S.d;
       if (k >= S.n || !S.r) break;
       plan.push({ etat: "repos", reprise: k, debut: t, duree: S.r });
       t += S.r;
+      if (!S.a) break; // pas de reprise auto : le plan s'arrête à la fin du repos
     }
     sansPiste = false;
     changerPiste(0);
@@ -971,16 +1001,19 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
         vibrer([400, 150, 400]);
         barre(1);
         chiffres("0:00");
-      } else {
+      } else if (e) {
         sonDirect("depart");
         vibrer(300);
       }
+    } else if (!prec && e.etat === "run") { // départ sans décompte
+      sonDirect("depart");
+      vibrer(300);
     }
     reprise = (e || prec).reprise;
     const fini = !e && reprise >= S.n;
     // animation : fin de reprise vers repos ou fin d'assaut, fin du repos vers reprise
     const anime = prec && !bond && prec.etat !== "decompte" && (e || fini);
-    (anime ? glisser : (f) => f())(() => (e ? afficherEtape(e) : finirPlan(fini)));
+    (anime ? glisser : (f) => f())(() => (e ? afficherEtape(e) : finirPlan(fini, prec.etat === "repos")));
   }
 
   function afficherEtape(e) {
@@ -993,7 +1026,8 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     barre(0);
   }
 
-  function finirPlan(fini) {
+  // Plan fini : fin de l'assaut, ou attente d'un appui (après une reprise sans repos, ou un repos sans reprise auto)
+  function finirPlan(fini, apresRepos) {
     clearInterval(minuteur);
     barre(1);
     chiffres("0:00");
@@ -1006,7 +1040,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
       laisserEteindre();
     } else {
       changerEtat("between");
-      $("msg").textContent = "Fin";
+      $("msg").textContent = apresRepos ? "Repos fini" : "Fin";
       $("sous").textContent = "";
       boutonJaune("Lancer la " + ordinal(reprise + 1));
     }
