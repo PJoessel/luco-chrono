@@ -441,9 +441,9 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
       <h3>Comment ça marche</h3>
       <ul>
         <li>Choisis le nombre de reprises, leur durée et le temps de repos entre deux reprises, puis appuie sur <b>Lancer</b>. L’app garde tes réglages pour la prochaine fois.</li>
-        <li>Quand tu lances une reprise, un décompte 3, 2, 1 s’affiche, avec un ding à chaque chiffre.</li>
+        <li>Quand tu lances une reprise, un décompte 3, 2, 1 s’affiche, avec un ding à chaque chiffre (option <b>Décompte 3, 2, 1 au départ</b>).</li>
         <li>Pendant une reprise, un ding sonne chaque seconde sur les 5 dernières secondes. À la fin de la reprise, trois dings.</li>
-        <li>Le repos démarre tout seul. À la fin du repos, deux dings aigus, et la reprise suivante démarre toute seule.</li>
+        <li>Le repos démarre tout seul. À la fin du repos, deux dings aigus, et la reprise suivante démarre toute seule (option <b>Reprise auto après le repos</b>).</li>
         <li>Pour lancer la reprise suivante avant la fin du repos, garde le doigt appuyé 1 seconde sur <b>Lancer</b>.</li>
         <li>Avec un arbitre, tu peux couper le <b>décompte 3, 2, 1</b> et la <b>reprise auto après le repos</b>. La reprise part alors dès que tu appuies sur <b>Lancer</b>, et à la fin du repos l’app attend que tu lances la suivante.</li>
         <li><b>Pause</b> arrête le temps pendant une reprise. <b>Arrêter</b> met fin à l’assaut, après une confirmation.</li>
@@ -569,7 +569,10 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     $("oA").setAttribute("aria-checked", S.a);
     $("oA").disabled = !S.r;
     try {
-      if (S.d !== TEST) localStorage.setItem(CLE, JSON.stringify(S));
+      // mode test (0:10) : on garde la durée déjà sauvée, mais les interrupteurs sont bien retenus
+      const sauve = { ...S };
+      if (S.d === TEST) sauve.d = (JSON.parse(localStorage.getItem(CLE)) || {}).d || 120;
+      localStorage.setItem(CLE, JSON.stringify(sauve));
     } catch (e) {}
   }
 
@@ -977,7 +980,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     const e = plan[i], reste = e.debut + e.duree - t, sec = Math.ceil(reste);
     // assaut de plus de 20 min : la tranche suivante de la piste est préparée 5 min avant la
     // fin de celle-ci, app à l'écran, pendant un silence (aucun ding en train de sonner ni proche)
-    if (!sansPiste && etat !== "paused" && t > pisteA - TRANCHE / 4 && pisteA < plan[plan.length - 1].debut + plan[plan.length - 1].duree &&
+    if (!sansPiste && t > pisteA - TRANCHE / 4 && pisteA < plan[plan.length - 1].debut + plan[plan.length - 1].duree &&
         t - e.debut > 2.5 && reste > 6 && document.visibilityState === "visible") changerPiste(t);
     if (sec !== derniereSec) {
       derniereSec = sec;
