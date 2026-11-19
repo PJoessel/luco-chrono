@@ -191,17 +191,16 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(
 /* limite atteinte (1 ou 20 reprises, 3:00…) : le bouton s'efface, l'appui ne fait rien */
 .step:disabled { opacity: .3; cursor: default; }
 /* Options sous le repos : interrupteurs (jaune = activé). Utiles avec un arbitre qui dirige l'assaut */
-.options { padding: 2px clamp(12px, 4cqw, 20px); }
-.opt { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; min-height: 60px; padding-block: 8px; text-align: left; font-size: clamp(17px, 5.4cqw, 23px); line-height: 1.15; text-wrap: balance; transition: background .15s; }
-.opt + .opt { border-top: 1px solid rgba(255, 255, 255, .08); }
+/* la marge est dans chaque ligne : l'éclaircissement à l'appui va jusqu'aux bords de la carte */
+.options { padding: 0; overflow: hidden; }
+.opt { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; min-height: 62px; padding: 9px clamp(12px, 4cqw, 20px); text-align: left; font-size: clamp(17px, 5.4cqw, 23px); line-height: 1.15; text-wrap: balance; transition: background .15s; }
+.opt + .opt { box-shadow: inset 0 1px rgba(255, 255, 255, .08); }
 .inter { flex: none; position: relative; width: 62px; height: 36px; border-radius: 999px; background: var(--gris); transition: background .2s; }
 .inter::after { content: ""; position: absolute; top: 3px; left: 3px; width: 30px; height: 30px; border-radius: 50%; background: var(--gris-clair); transition: transform .2s, background .2s; }
 .opt[aria-checked="true"] .inter { background: var(--jaune); }
 .opt[aria-checked="true"] .inter::after { transform: translateX(26px); background: var(--noir); }
 /* appui : la ligne s'éclaircit un instant, comme les + et − qui passent au jaune */
-.opt:not(:disabled):active { background: color-mix(in srgb, var(--blanc) 7%, transparent); }
-/* repos sur « Non » : rien ne s'enchaîne tout seul, l'option ne sert à rien */
-.opt:disabled { opacity: .3; cursor: default; }
+.opt:active { background: color-mix(in srgb, var(--blanc) 7%, transparent); }
 .go {
   margin-top: clamp(10px, 2cqh, 18px);
   display: flex;
@@ -246,6 +245,11 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(
 .defile .important h3 { color: var(--jaune); }
 .defile .pied { margin-top: 32px; text-align: center; font-size: 16px; color: var(--gris-clair); }
 .pied a { color: var(--jaune); text-underline-offset: 3px; }
+/* Journal technique : pour comprendre les gels de l'app sur iPhone (rien n'est envoyé) */
+.journal { margin-top: 20px; font-size: 15px; color: var(--gris-clair); }
+.journal summary { cursor: pointer; text-align: center; text-decoration: underline; text-underline-offset: 3px; }
+.journal pre { margin: 12px 0; padding: 12px; max-height: 320px; overflow: auto; background: var(--carte); border-radius: 14px; font: inherit; line-height: 1.35; white-space: pre-wrap; -webkit-user-select: text; user-select: text; }
+.journal button { display: block; margin: 0 auto; min-height: 44px; padding: 0 18px; color: var(--jaune); text-decoration: underline; text-underline-offset: 3px; }
 
 /* ---------- Chrono ----------
    Une couleur par état (data-etat sur #run) :
@@ -253,7 +257,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(
 #run { --etat: var(--blanc); }
 #run[data-etat="paused"] { --etat: var(--gris-clair); }
 #run[data-etat="repos"] { --etat: var(--bleu); }
-#run[data-etat="between"], #run[data-etat="done"] { --etat: var(--rouge-doux); }
+#run[data-etat="between"], #run[data-etat="fin"], #run[data-etat="done"] { --etat: var(--rouge-doux); }
 
 /* 1. Ligne du haut : « 2e reprise » à gauche, « sur 3 » à droite (pendant le repos : « 2 / 3 faites » centré) */
 .tete-run { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-size: clamp(20px, 6.2cqw, 30px); line-height: 1; color: var(--pale); white-space: nowrap; }
@@ -456,7 +460,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
       <p>Quand un arbitre dirige l’assaut, il donne lui-même le départ. Sous le repos, deux interrupteurs permettent de suivre ses commandements :</p>
       <ul>
         <li><b>3, 2, 1 au lancement de l’assaut</b> : coupé, la reprise part dès que tu appuies sur <b>Lancer</b>.</li>
-        <li><b>Lancement automatique de la reprise après le repos</b> : coupé, à la fin du repos l’app affiche « Repos fini » et attend que tu lances la suivante.</li>
+        <li><b>Lancement automatique de la reprise après le repos</b> : coupé, à la fin du repos l’app affiche « Repos fini » et attend que tu lances la suivante. Si le repos est sur « Non », activé, la reprise suivante part toute seule 2 secondes après les dings de fin.</li>
       </ul>
     </section>
     <section class="important">
@@ -495,6 +499,11 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
       <p>Les mises à jour arrivent toutes seules : quand l’app est ouverte avec du réseau, elle récupère la nouvelle version et se recharge sur l’écran des réglages, jamais pendant un assaut.</p>
     </section>
     <p class="pied">Par Pierre Joëssel et Vincent Prunier, au club Les Cannes du Luco · <a href="https://github.com/PJoessel/luco-chrono" target="_blank" rel="noopener">le code sur GitHub</a></p>
+    <details class="journal" id="journal">
+      <summary>Journal technique</summary>
+      <pre id="jTexte"></pre>
+      <button id="jEffacer">Effacer le journal</button>
+    </details>
   </div>
 </section>
 
@@ -534,6 +543,65 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
+
+  /* ---------- Journal ----------
+     Pour comprendre les gels vus sur iPhone (l'app ne répond plus aux appuis) : l'app note
+     en silence, sur le téléphone seulement, ses erreurs, ses sorties et retours, et les
+     derniers appuis avec leur effet. À lire en bas de la page d'infos. Rien n'est envoyé. */
+
+  const CLE_J = "chrono-canne-journal";
+  let journal = [];
+  try { journal = JSON.parse(localStorage.getItem(CLE_J)) || []; } catch (e) {}
+
+  function noter(texte) {
+    const d = new Date();
+    journal.push(d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" }) + " " + d.toLocaleTimeString("fr-FR") + " · " + texte);
+    if (journal.length > 80) journal = journal.slice(-80);
+    try { localStorage.setItem(CLE_J, JSON.stringify(journal)); } catch (e) {}
+  }
+
+  addEventListener("error", (e) => noter("ERREUR : " + e.message + " (ligne " + e.lineno + ")"));
+  addEventListener("unhandledrejection", (e) => noter("ERREUR : " + ((e.reason && e.reason.message) || e.reason)));
+  // Signe de vie : toutes les 2 s, l'app écrit l'heure et son état. Après un gel, on voit à la
+  // réouverture jusqu'à quand elle tournait : si c'est jusqu'au moment où on l'a quittée, elle
+  // était vivante et c'est l'iPhone qui ne lui passait plus les appuis ; sinon, elle s'était figée.
+  const CLE_V = "chrono-canne-vie";
+  try {
+    const v = JSON.parse(localStorage.getItem(CLE_V));
+    if (v) noter("dernier signe de vie avant cette ouverture : " + v.h + " (" + v.etat + (v.chrono ? ", chrono à " + v.chrono : "") + ")");
+  } catch (e) {}
+  noter("ouverture (" + (navigator.standalone || matchMedia("(display-mode: standalone)").matches ? "app installée" : "navigateur") + ")");
+  setInterval(() => {
+    try {
+      localStorage.setItem(CLE_V, JSON.stringify({ h: new Date().toLocaleTimeString("fr-FR"), etat, chrono: etat === "setup" ? "" : $("digits").textContent }));
+    } catch (e) {}
+  }, 2000);
+  document.addEventListener("visibilitychange", () => {
+    noter(document.visibilityState === "visible" ? "retour dans l’app" : "app quittée (" + etat + ")");
+    if (document.visibilityState === "visible") dernierTic = Date.now(); // le chrono reprend : pas de faux « figé »
+  });
+
+  // Chaque appui : sur quoi, dans quel état, et s'il a eu un effet (un clic dans la seconde qui suit)
+  let appuiEnCours = null, attenteClic = null;
+  const nomBouton = (b) => b.id || b.getAttribute("aria-label") || b.textContent.trim().slice(0, 24);
+  document.addEventListener("touchstart", (e) => {
+    const b = e.target.closest && e.target.closest("button, a, summary");
+    const enMarche = ["run", "repos", "decompte", "fin"].includes(etat);
+    const fige = enMarche && Date.now() - dernierTic > 1500 ? ", ÉCRAN FIGÉ depuis " + Math.round((Date.now() - dernierTic) / 1000) + " s" : "";
+    appuiEnCours = "appui " + (b ? nomBouton(b) : "à côté") + " (" + etat + fige + ")";
+    if (!b || fige) { noter(appuiEnCours); appuiEnCours = null; }
+  }, { capture: true, passive: true });
+  document.addEventListener("touchend", () => {
+    clearTimeout(attenteClic);
+    if (!appuiEnCours) return;
+    const t = appuiEnCours;
+    attenteClic = setTimeout(() => { noter(t + " : SANS EFFET"); appuiEnCours = null; }, 1000);
+  }, { capture: true, passive: true });
+  document.addEventListener("click", () => {
+    clearTimeout(attenteClic);
+    if (appuiEnCours) noter(appuiEnCours + " : ok");
+    appuiEnCours = null;
+  }, true);
 
   /* ---------- Réglages ---------- */
 
@@ -577,7 +645,6 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     document.querySelectorAll(".step").forEach((b) => { b.disabled = S[b.dataset.k] === lim[b.dataset.k][b.dataset.d < 0 ? 0 : 1]; });
     $("oC").setAttribute("aria-checked", S.c);
     $("oA").setAttribute("aria-checked", S.a);
-    $("oA").disabled = !S.r;
     try {
       // mode test (0:10) : on garde la durée déjà sauvée, mais les interrupteurs sont bien retenus
       const sauve = { ...S };
@@ -697,11 +764,12 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     }
 
     if (plan[0].etat === "run") ecrire("depart", 0); // sans décompte : la reprise part tout de suite
-    plan.forEach((e) => {
+    plan.forEach((e, i) => {
       const fin = e.debut + e.duree;
-      for (let s = 1; s <= Math.min(5, Math.ceil(e.duree)); s++) ecrire("bip", Math.max(e.debut, fin - s));
+      if (e.etat !== "fin") for (let s = 1; s <= Math.min(5, Math.ceil(e.duree)); s++) ecrire("bip", Math.max(e.debut, fin - s));
       if (e.etat === "run") ecrire("fin", fin);
-      else if (e !== der) ecrire("depart", fin); // repos en fin de plan (pas de reprise auto) : on attend l'appui
+      // dings de départ seulement si une reprise suit (repos en fin de plan : on attend l'appui ; avant un 3, 2, 1 : rien)
+      else if (plan[i + 1] && plan[i + 1].etat === "run") ecrire("depart", fin);
     });
 
     // en-tête WAV : 16 bits, mono
@@ -746,7 +814,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
   piste.addEventListener("pause", () => {
     if (piste.ended || sansPiste) return;
     if (etat === "run") mettreEnPause();
-    else if (etat === "repos" || etat === "decompte") jouerPiste(); // pas de pause possible : on relance
+    else if (etat === "repos" || etat === "decompte" || etat === "fin") jouerPiste(); // pas de pause possible : on relance
   });
 
   // Écran verrouillé : la piste s'y affiche comme une musique. Ses boutons pause / lecture
@@ -841,12 +909,13 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     if (document.visibilityState !== "visible") return;
     if (ac && ac.state !== "running") ac.resume().catch(() => {});
     if (etat !== "setup" && etat !== "done") garderAllume();
-    if (etat === "run" || etat === "repos" || etat === "decompte") relancerPiste();
+    if (etat === "run" || etat === "repos" || etat === "decompte" || etat === "fin") relancerPiste();
   });
 
   /* ---------- Chrono ----------
      États : setup (réglages), decompte (3, 2, 1), run (combat), paused, repos,
-     between (attente d'un appui : reprise finie sans repos, ou repos fini sans reprise auto),
+     fin (2 s entre deux reprises sans repos, lancement auto activé),
+     between (attente d'un appui : reprise finie sans repos, ou repos fini, sans lancement auto),
      done (assaut fini).
      L'état est recopié dans #run[data-etat] : le CSS en tire les couleurs.
 
@@ -862,6 +931,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
   let t0 = 0;         // heure du départ du plan (Date.now), décalée de la durée des pauses
   let pauseA = 0;     // heure de la mise en pause
   let derniereSec = null;
+  let dernierTic = 0; // pour le journal : le chrono avance-t-il encore ?
   let minuteur = null;
 
   function changerEtat(e) {
@@ -958,10 +1028,17 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
     for (let k = reprise; ; k++) {
       plan.push({ etat: "run", reprise: k, debut: t, duree: S.d });
       t += S.d;
-      if (k >= S.n || !S.r) break;
-      plan.push({ etat: "repos", reprise: k, debut: t, duree: S.r });
-      t += S.r;
-      if (!S.a) break; // pas de reprise auto : le plan s'arrête à la fin du repos
+      if (k >= S.n || !S.a && !S.r) break; // dernière reprise, ou sans repos ni lancement auto : on attend l'appui
+      if (S.r) {
+        plan.push({ etat: "repos", reprise: k, debut: t, duree: S.r });
+        t += S.r;
+        if (!S.a) break; // pas de lancement auto : le plan s'arrête à la fin du repos
+      } else {
+        // sans repos, lancement auto : « Fin » 2 s (le temps des dings de fin), puis le 3, 2, 1 s'il est activé
+        plan.push({ etat: "fin", reprise: k, debut: t, duree: 2 });
+        t += 2;
+        if (S.c) { plan.push({ etat: "decompte", reprise: k + 1, debut: t, duree: 3 }); t += 3; }
+      }
     }
     sansPiste = false;
     changerPiste(0);
@@ -983,6 +1060,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
   }
 
   function tic() {
+    dernierTic = Date.now();
     const t = (Date.now() - t0) / 1000;
     let i = Math.max(0, iPlan);
     while (i < plan.length && t >= plan[i].debut + plan[i].duree) i++;
@@ -995,11 +1073,12 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
         t - e.debut > 2.5 && reste > 6 && document.visibilityState === "visible") changerPiste(t);
     if (sec !== derniereSec) {
       derniereSec = sec;
-      if (sec <= 5) sonDirect("bip");
+      if (sec <= 5 && etat !== "fin") sonDirect("bip");
       if (etat === "decompte") chiffres(String(sec));
+      else if (etat === "fin") chiffres("0:00");
       else chiffres(fmt(sec), sec <= 5 ? "alerte" : "");
     }
-    barre(1 - reste / e.duree);
+    barre(etat === "fin" ? 1 : 1 - reste / e.duree);
   }
 
   // Passage à l'étape i du plan (i = plan.length : le plan est fini)
@@ -1015,7 +1094,7 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
         vibrer([400, 150, 400]);
         barre(1);
         chiffres("0:00");
-      } else if (e) {
+      } else if (e && e.etat === "run") {
         sonDirect("depart");
         vibrer(300);
       }
@@ -1032,12 +1111,12 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
 
   function afficherEtape(e) {
     changerEtat(e.etat);
-    $("msg").textContent = { decompte: "Départ dans", run: "", repos: "Repos" }[e.etat];
+    $("msg").textContent = { decompte: "Départ dans", run: "", repos: "Repos", fin: "Fin" }[e.etat];
     $("sous").textContent = "";
     if (e.etat === "repos") boutonJaune("Lancer", "appui long");
     else boutonJaune("Pause");
-    $("bPause").disabled = e.etat === "decompte"; // pas de pause pendant le 3, 2, 1
-    barre(0);
+    $("bPause").disabled = e.etat === "decompte" || e.etat === "fin"; // pas de pause pendant le 3, 2, 1 ni la courte « Fin »
+    barre(e.etat === "fin" ? 1 : 0);
   }
 
   // Plan fini : fin de l'assaut, ou attente d'un appui (après une reprise sans repos, ou un repos sans reprise auto)
@@ -1184,10 +1263,16 @@ html.tourne-d body { transform: translateX(100dvw) rotate(90deg); }
   }
   $("bInfo").addEventListener("click", () => {
     montrer("infos");
+    $("jTexte").textContent = journal.slice().reverse().join("\n"); // le plus récent en haut
     document.querySelector("#infos .defile").scrollTop = 0;
     $("bRetour").focus({ preventScroll: true });
   });
   $("bRetour").addEventListener("click", fermerInfos);
+  $("jEffacer").addEventListener("click", () => {
+    journal = [];
+    try { localStorage.removeItem(CLE_J); localStorage.removeItem(CLE_V); } catch (e) {}
+    $("jTexte").textContent = "";
+  });
 
   /* ---------- Toujours en portrait ----------
      Angle du téléphone : 90 = tourné vers la gauche, -90 ou 270 = vers la droite.
