@@ -248,11 +248,6 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(
 .defile .important h3 { color: var(--jaune); }
 .defile .pied { margin-top: 32px; text-align: center; font-size: 16px; color: var(--gris-clair); }
 .pied a { color: var(--jaune); text-underline-offset: 3px; }
-/* Journal technique : pour comprendre les gels de l'app sur iPhone (rien n'est envoyé) */
-.journal { margin-top: 20px; font-size: 15px; color: var(--gris-clair); }
-.journal summary { cursor: pointer; text-align: center; text-decoration: underline; text-underline-offset: 3px; }
-.journal pre { margin: 12px 0; padding: 12px; max-height: 320px; overflow: auto; background: var(--carte); border-radius: 14px; font: inherit; line-height: 1.35; white-space: pre-wrap; -webkit-user-select: text; user-select: text; }
-.journal button { display: block; margin: 0 auto; min-height: 44px; padding: 0 18px; color: var(--jaune); text-decoration: underline; text-underline-offset: 3px; }
 
 /* ---------- Chrono ----------
    Une couleur par état (data-etat sur #run) :
@@ -513,11 +508,6 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(
       <p>Les mises à jour arrivent toutes seules : quand l’app est ouverte avec du réseau, elle récupère la nouvelle version et se recharge sur l’écran des réglages, jamais pendant un assaut.</p>
     </section>
     <p class="pied">Par Pierre Joëssel et Vincent Prunier, au club Les Cannes du Luco · <a href="https://github.com/PJoessel/luco-chrono" target="_blank" rel="noopener">le code sur GitHub</a></p>
-    <details class="journal" id="journal">
-      <summary>Journal technique</summary>
-      <pre id="jTexte"></pre>
-      <button id="jEffacer">Effacer le journal</button>
-    </details>
   </div>
 </section>
 
@@ -558,71 +548,8 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(
 (() => {
   const $ = (id) => document.getElementById(id);
 
-  /* ---------- Journal ----------
-     Pour comprendre les gels vus sur iPhone (l'app ne répond plus aux appuis) : l'app note
-     en silence, sur le téléphone seulement, ses erreurs, ses sorties et retours, et les
-     derniers appuis avec leur effet. À lire en bas de la page d'infos. Rien n'est envoyé. */
-
-  const CLE_J = "chrono-canne-journal";
-  let journal = [];
-  try { journal = JSON.parse(localStorage.getItem(CLE_J)) || []; } catch (e) {}
-
-  function noter(texte) {
-    const d = new Date();
-    journal.push(d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" }) + " " + d.toLocaleTimeString("fr-FR") + " · " + texte);
-    if (journal.length > 80) journal = journal.slice(-80);
-    try { localStorage.setItem(CLE_J, JSON.stringify(journal)); } catch (e) {}
-  }
-
-  addEventListener("error", (e) => noter("ERREUR : " + e.message + " (ligne " + e.lineno + ")"));
-  addEventListener("unhandledrejection", (e) => noter("ERREUR : " + ((e.reason && e.reason.message) || e.reason)));
-  // Signe de vie : toutes les 2 s, l'app écrit l'heure et son état. Après un gel, on voit à la
-  // réouverture jusqu'à quand elle tournait : si c'est jusqu'au moment où on l'a quittée, elle
-  // était vivante et c'est l'iPhone qui ne lui passait plus les appuis ; sinon, elle s'était figée.
-  const CLE_V = "chrono-canne-vie";
-  try {
-    const v = JSON.parse(localStorage.getItem(CLE_V));
-    if (v) noter("dernier signe de vie avant cette ouverture : " + v.h + " (" + v.etat + (v.chrono ? ", chrono à " + v.chrono : "") + ")");
-  } catch (e) {}
-  noter("ouverture (" + (navigator.standalone || matchMedia("(display-mode: standalone)").matches ? "app installée" : "navigateur") + ")");
-  setInterval(() => {
-    try {
-      localStorage.setItem(CLE_V, JSON.stringify({ h: new Date().toLocaleTimeString("fr-FR"), etat, chrono: etat === "setup" ? "" : $("digits").textContent }));
-    } catch (e) {}
-  }, 2000);
-  document.addEventListener("visibilitychange", () => {
-    noter(document.visibilityState === "visible" ? "retour dans l’app" : "app quittée (" + etat + ")");
-    if (document.visibilityState === "visible") dernierTic = Date.now(); // le chrono reprend : pas de faux « figé »
-  });
-
-  // Chaque appui : sur quoi, dans quel état, et s'il a eu un effet (un clic dans la seconde qui suit)
-  let appuiEnCours = null, attenteClic = null;
-  const nomBouton = (b) => b.id || b.getAttribute("aria-label") || b.textContent.trim().slice(0, 24);
-  document.addEventListener("touchstart", (e) => {
-    const b = e.target.closest && e.target.closest("button, a, summary");
-    const enMarche = ["run", "repos", "decompte", "fin"].includes(etat);
-    const fige = enMarche && Date.now() - dernierTic > 1500 ? ", ÉCRAN FIGÉ depuis " + Math.round((Date.now() - dernierTic) / 1000) + " s" : "";
-    appuiEnCours = "appui " + (b ? nomBouton(b) : "à côté") + " (" + etat + fige + ")";
-    if (!b) { // où l'appui est tombé, et la page était-elle décalée ? (gel du 19/11/2026)
-      const t = e.touches[0], vv = window.visualViewport;
-      appuiEnCours += " [x " + Math.round(t.clientX) + ", y " + Math.round(t.clientY) + " sur " + (e.target.id || e.target.className || e.target.tagName) +
-        ", écran " + innerWidth + "×" + innerHeight +
-        (scrollX || scrollY ? ", page défilée de " + Math.round(scrollX) + "/" + Math.round(scrollY) : "") +
-        (vv && (vv.scale !== 1 || vv.offsetLeft || vv.offsetTop) ? ", zoom " + vv.scale.toFixed(2) + " décalé de " + Math.round(vv.offsetLeft) + "/" + Math.round(vv.offsetTop) : "") + "]";
-    }
-    if (!b || fige) { noter(appuiEnCours); appuiEnCours = null; }
-  }, { capture: true, passive: true });
-  document.addEventListener("touchend", () => {
-    clearTimeout(attenteClic);
-    if (!appuiEnCours) return;
-    const t = appuiEnCours;
-    attenteClic = setTimeout(() => { noter(t + " : SANS EFFET"); appuiEnCours = null; }, 1000);
-  }, { capture: true, passive: true });
-  document.addEventListener("click", () => {
-    clearTimeout(attenteClic);
-    if (appuiEnCours) noter(appuiEnCours + " : ok");
-    appuiEnCours = null;
-  }, true);
+  // le journal technique (gel de novembre 2026, compris et corrigé) n'existe plus : on efface ce qu'il avait noté
+  try { localStorage.removeItem("chrono-canne-journal"); localStorage.removeItem("chrono-canne-vie"); } catch (e) {}
 
   /* ---------- Réglages ---------- */
 
@@ -952,7 +879,6 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(
   let t0 = 0;         // heure du départ du plan (Date.now), décalée de la durée des pauses
   let pauseA = 0;     // heure de la mise en pause
   let derniereSec = null;
-  let dernierTic = 0; // pour le journal : le chrono avance-t-il encore ?
   let minuteur = null;
 
   function changerEtat(e) {
@@ -1081,7 +1007,6 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(
   }
 
   function tic() {
-    dernierTic = Date.now();
     const t = (Date.now() - t0) / 1000;
     let i = Math.max(0, iPlan);
     while (i < plan.length && t >= plan[i].debut + plan[i].duree) i++;
@@ -1284,16 +1209,10 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(
   }
   $("bInfo").addEventListener("click", () => {
     montrer("infos");
-    $("jTexte").textContent = journal.slice().reverse().join("\n"); // le plus récent en haut
     document.querySelector("#infos .defile").scrollTop = 0;
     $("bRetour").focus({ preventScroll: true });
   });
   $("bRetour").addEventListener("click", fermerInfos);
-  $("jEffacer").addEventListener("click", () => {
-    journal = [];
-    try { localStorage.removeItem(CLE_J); localStorage.removeItem(CLE_V); } catch (e) {}
-    $("jTexte").textContent = "";
-  });
 
   /* ---------- Rotation ----------
      L'app suit le téléphone (portrait ou paysage, voir le CSS « Paysage »). Par sécurité,
